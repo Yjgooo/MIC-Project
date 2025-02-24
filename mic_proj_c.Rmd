@@ -10,7 +10,7 @@ Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by press
 Note that the survival curve S(t) = P(T> t) is right-continuous (same as cdf). 
 
 ```{r}
-
+library(dplyr)
 library(icenReg)
 
 simulate_data_dep <- function(n, k, seed = NULL) {
@@ -70,7 +70,6 @@ simulate_data_dep <- function(n, k, seed = NULL) {
 }
 
 
-
 compute_mean_time_ic_np <- function(model, which_row = 1) {
   model <- getSCurves(model)  
 
@@ -109,12 +108,12 @@ compute_mean_time_ic_np <- function(model, which_row = 1) {
 
 ```{r}
 # Example usage:
-data <- simulate_data_dep(10000, 2, seed = 32)
+data <- simulate_data_dep(30000, 3, seed = 32)
 df <- subset(data, select = -T) #dataframe without T
 print(data)
 ```
 
-#Simulate the 
+
 
 ```{r}
 #sp stands for semi-parametric
@@ -122,6 +121,8 @@ fit_np <- ic_np(cbind(df$l, df$r))
 fit_po <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
 fit_ph <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
 
+s <- getSCurves(fit_np_new)
+s$S_curves
 
 #compute_mean_time_ic_np(np_curve)
 plot(fit_np)
@@ -138,3 +139,23 @@ compute_mean_time_ic_np(fit_ph)
 s <- getSCurves(fit_ph)$Tbull_ints
 print(s)
 ```
+
+#Exploiting the discreteness 
+```{r}
+p1 <- nrow(df %>% filter(Delta ==1, Indicator == 1)) / nrow(df %>% filter(Delta ==1))
+s <- getSCurves(fit_np_new)$S_curves[[1]]
+s[1] = 1- p1
+s
+
+#Throw away data with delta == 1? So the missing mechanism is independent from the outcome
+#df_minus_1 <- df %>% filter(Delta !=1)
+#fit_np_new <- ic_np(cbind(df_minus_1$l, df_minus_1$r))
+#plot(fit_np_new)
+
+#s_new <- getSCurves(fit_np_new)
+#s_new$S_curves
+```
+
+
+```
+
