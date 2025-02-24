@@ -3,13 +3,11 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
-
+Note that the survival curve S(t) = P(T> t) is right-continuous (same as cdf). 
 
 ```{r}
 
@@ -71,12 +69,47 @@ simulate_data_dep <- function(n, k, seed = NULL) {
   return(df)
 }
 
+
+
+compute_mean_time_ic_np <- function(model, which_row = 1) {
+  model <- getSCurves(model)  
+
+  # Extract Turnbull intervals (a k x 2 matrix)
+  Tbull_ints <- model$Tbull_ints
+  
+  # Extract survival curve estimates
+  S_curve <- model$S_curves[[1]] #double-check
+  # If S_curve is a matrix (multiple covariate profiles), select one row
+  if (is.matrix(S_curve)) {
+    S_curve <- S_curve[which_row, ]
+  }
+  
+  k <- length(S_curve)
+  
+  # Compute probability masses from the survival drops:
+  # p1 = 1 - S_curve[1]
+  # p_j = S_curve[j-1] - S_curve[j] for j >= 2
+  p <- numeric(k)
+  p[1] <- 1 - S_curve[1]
+  if (k > 1) {
+    p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
+  }
+  
+  # Compute representative times: use the midpoint of each Turnbull interval
+  midpoints <- rowMeans(Tbull_ints)
+  
+  # Calculate the mean event time as the weighted average of the midpoints
+  mean_event_time <- sum(p * midpoints)
+  
+  return(mean_event_time)
+}
+
 ```
 
 
 ```{r}
 # Example usage:
-data <- simulate_data_dep(100, 10, seed = 32)
+data <- simulate_data_dep(10000, 2, seed = 32)
 df <- subset(data, select = -T) #dataframe without T
 print(data)
 ```
@@ -89,9 +122,19 @@ fit_np <- ic_np(cbind(df$l, df$r))
 fit_po <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
 fit_ph <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
 
+
+#compute_mean_time_ic_np(np_curve)
 plot(fit_np)
 plot(fit_po)
 plot(fit_ph)
 ```
+```{r}
+compute_mean_time_ic_np(fit_np)
+compute_mean_time_ic_np(fit_po)
+compute_mean_time_ic_np(fit_ph)
+```
 
+```{r}
+s <- getSCurves(fit_ph)$Tbull_ints
+print(s)
 ```
