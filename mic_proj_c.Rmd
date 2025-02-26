@@ -17,17 +17,8 @@ simulate_data_dep <- function(n, k, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
   
   # --- Simulate covariates ---
-  # 'race' is a categorical variable with 3 levels (represented as 1, 2, or 3)
   race <- sample(1:3, n, replace = TRUE, prob = rep(1/3, 3))
-  # Simulate the numerical variable (values 1,2,3)
   X_num <- sample(1:3, n, replace = TRUE, prob = rep(1/3, 3))
-  
-  # Compute a categorical effect based on race:
-  # For example:
-  # - Race 1: effect = 0
-  # - Race 2: effect = 0.5
-  # - Race 3: effect = -0.5
-  cat_effect <- ifelse(race == 1, 0, ifelse(race == 2, 0.5, -0.5))
   
   # --- Define possible values for Delta and T ---
   delta_vals <- 1:k   # Delta takes values from -4 to 4 (9 categories)
@@ -37,8 +28,7 @@ simulate_data_dep <- function(n, k, seed = NULL) {
   Delta <- numeric(n)
   T <- numeric(n)
   
-  
-  # --- Sample Delta and T conditionally on the covariates ---
+  # --- Sample Delta and T conditionally on the covariates --- 
   for (i in 1:n) {
     # For Delta:
     weights_delta <- rep(1/k, k)
@@ -70,24 +60,17 @@ simulate_data_dep <- function(n, k, seed = NULL) {
 }
 
 
-compute_mean_time_ic_np <- function(model, which_row = 1) {
-  model <- getSCurves(model)  
+mean_from_surv <- function(model, cov = NULL) {
+  model <- getSCurves(model, cov)  
 
   # Extract Turnbull intervals (a k x 2 matrix)
   Tbull_ints <- model$Tbull_ints
   
   # Extract survival curve estimates
   S_curve <- model$S_curves[[1]] #double-check
-  # If S_curve is a matrix (multiple covariate profiles), select one row
-  if (is.matrix(S_curve)) {
-    S_curve <- S_curve[which_row, ]
-  }
-  
   k <- length(S_curve)
   
   # Compute probability masses from the survival drops:
-  # p1 = 1 - S_curve[1]
-  # p_j = S_curve[j-1] - S_curve[j] for j >= 2
   p <- numeric(k)
   p[1] <- 1 - S_curve[1]
   if (k > 1) {
@@ -103,53 +86,38 @@ compute_mean_time_ic_np <- function(model, which_row = 1) {
   return(mean_event_time)
 }
 
-```
-
-#Meta function
-```{r}
 MIC <- function(df, method, user_formula = NULL, cov_input = NULL) {
   
   if(method == "np"){
-    
     model <- ic_np(cbind(df$l, df$r))
-    
-    p1 <- nrow(df %>% filter(Delta ==1, Indicator == 1)) / nrow(df %>% filter(Delta ==1))
-    s <- getSCurves(fit_np)$S_curves[[1]]
-    s[2] = 1 - p1
-    meanT <- compute_mean_time_ic_np(model)
-    
-    meanD <- mean()
-    
-  }else if(method == "po"){
-    
+  } else if(method %in% c("po", "ph")){
     full_formula <- as.formula(
-      paste("Surv(L, R, type = 'interval2') ~", user_formula) #formula is user specified, e.g. "X_num + factor(race)"
-      )
-    
-    model <- ic_sp(full_formula, data = df, model = "po")
-    
-  }else if(method == "ph"){
-    
-    full_formula <- as.formula(
-      paste("Surv(L, R, type = 'interval2') ~", user_formula) #formula is user specified, e.g. "X_num + factor(race)"
+      paste("Surv(L, R, type = 'interval2') ~", user_formula)
     )
-    
-    model <- ic_sp(full_formula, data = df, model = "ph")
-    
-  }else{
+    model <- ic_sp(full_formula, data = df, model = method)
+  } else {
     stop("Unsupported method: ", method)
   }
   
+  # Common operations for all methods
+  meanT <- mean_from_surv(model)
+  meanD <- mean(df$Delta)
+  
   result <- list(
     model = model,
-    mean = mean_value
+    meanT = meanT,
+    meanD = meanD
   )
   
   return(result)
 }
+
 ```
 
+#Meta function
+```{r}
 
+```
 
 #Data simulation 
 ```{r}
@@ -166,28 +134,30 @@ fit_np <- ic_np(cbind(df$l, df$r))
 fit_po <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
 fit_ph <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
 
-#compute_mean_time_ic_np(np_curve)
+#mean_from_surv(np_curve)
 plot(fit_np)
 plot(fit_po)
 plot(fit_ph)
 
 #compute E[T]
-compute_mean_time_ic_np(fit_np)
-compute_mean_time_ic_np(fit_po)
-compute_mean_time_ic_np(fit_ph)
+mean_from_surv(fit_np)
+mean_from_surv(fit_po)
+mean_from_surv(fit_ph)
 ```
 
 
 ```{r}
-s <- getSCurves(fit_ph)$Tbull_ints
-print(s)
+s <- getSCurves(fit_np)
+s$Tbull_ints
+s$S_curves
 
 
 # Create a new data frame with the covariate values you want to examine.
 newcov <- data.frame(race =1, X_num = 2)
 # Use predict with type = "surv" to get the survival probabilities over time.
 s_ph <- getSCurves(fit_ph, newcov)
-s_ph
+s_ph$S_curves
+mean_from_surv(fit_ph, newcov)
 ```
 
 #Exploiting the discreteness 
@@ -208,5 +178,9 @@ s
 ```
 
 
+#User command
+```{r}
+result <- MIC(df, method = "po", user_formula = "X_num + factor(race)", data.frame(race =2, X_num = 2))
+result
 ```
 
