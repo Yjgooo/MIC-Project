@@ -63,8 +63,8 @@ simulate_data_dep <- function(n, k, seed = NULL) {
     X_num = X_num
   )
   
-  df$l <- ifelse(df$Indicator == 1, 1, df$Delta) #double-check
-  df$r <- ifelse(df$Indicator == 1, df$Delta, k) #double-check
+  df$L <- ifelse(df$Indicator == 1, 1, df$Delta) #double-check
+  df$R <- ifelse(df$Indicator == 1, df$Delta, k) #double-check
   
   return(df)
 }
@@ -105,10 +105,55 @@ compute_mean_time_ic_np <- function(model, which_row = 1) {
 
 ```
 
-
+#Meta function
 ```{r}
-# Example usage:
-data <- simulate_data_dep(30000, 3, seed = 32)
+MIC <- function(df, method, user_formula = NULL, cov_input = NULL) {
+  
+  if(method == "np"){
+    
+    model <- ic_np(cbind(df$l, df$r))
+    
+    p1 <- nrow(df %>% filter(Delta ==1, Indicator == 1)) / nrow(df %>% filter(Delta ==1))
+    s <- getSCurves(fit_np)$S_curves[[1]]
+    s[2] = 1 - p1
+    meanT <- compute_mean_time_ic_np(model)
+    
+    meanD <- mean()
+    
+  }else if(method == "po"){
+    
+    full_formula <- as.formula(
+      paste("Surv(L, R, type = 'interval2') ~", user_formula) #formula is user specified, e.g. "X_num + factor(race)"
+      )
+    
+    model <- ic_sp(full_formula, data = df, model = "po")
+    
+  }else if(method == "ph"){
+    
+    full_formula <- as.formula(
+      paste("Surv(L, R, type = 'interval2') ~", user_formula) #formula is user specified, e.g. "X_num + factor(race)"
+    )
+    
+    model <- ic_sp(full_formula, data = df, model = "ph")
+    
+  }else{
+    stop("Unsupported method: ", method)
+  }
+  
+  result <- list(
+    model = model,
+    mean = mean_value
+  )
+  
+  return(result)
+}
+```
+
+
+
+#Data simulation 
+```{r}
+data <- simulate_data_dep(10000, 3, seed = 22)
 df <- subset(data, select = -T) #dataframe without T
 print(data)
 ```
@@ -118,33 +163,39 @@ print(data)
 ```{r}
 #sp stands for semi-parametric
 fit_np <- ic_np(cbind(df$l, df$r))
-fit_po <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
-fit_ph <- ic_sp(Surv(l, r, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
-
-s <- getSCurves(fit_np_new)
-s$S_curves
+fit_po <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
+fit_ph <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
 
 #compute_mean_time_ic_np(np_curve)
 plot(fit_np)
 plot(fit_po)
 plot(fit_ph)
-```
-```{r}
+
+#compute E[T]
 compute_mean_time_ic_np(fit_np)
 compute_mean_time_ic_np(fit_po)
 compute_mean_time_ic_np(fit_ph)
 ```
 
+
 ```{r}
 s <- getSCurves(fit_ph)$Tbull_ints
 print(s)
+
+
+# Create a new data frame with the covariate values you want to examine.
+newcov <- data.frame(race =1, X_num = 2)
+# Use predict with type = "surv" to get the survival probabilities over time.
+s_ph <- getSCurves(fit_ph, newcov)
+s_ph
 ```
 
 #Exploiting the discreteness 
 ```{r}
+
 p1 <- nrow(df %>% filter(Delta ==1, Indicator == 1)) / nrow(df %>% filter(Delta ==1))
-s <- getSCurves(fit_np_new)$S_curves[[1]]
-s[1] = 1- p1
+s <- getSCurves(fit_np)$S_curves[[1]]
+s[2] = 1 - p1
 s
 
 #Throw away data with delta == 1? So the missing mechanism is independent from the outcome
