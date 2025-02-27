@@ -13,15 +13,17 @@ Note that the survival curve S(t) = P(T> t) is right-continuous (same as cdf).
 library(dplyr)
 library(icenReg)
 
-simulate_data_dep <- function(n, k, seed = NULL) {
+#k = max_score - 1, whereas max_score is assumed to be in {1,2,...,max_score}
+simulate_data_dep <- function(n, max_score, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
+  k <- max_score - 1 #k: max improvement 
   
   # --- Simulate covariates ---
   race <- sample(1:3, n, replace = TRUE, prob = rep(1/3, 3))
   X_num <- sample(1:3, n, replace = TRUE, prob = rep(1/3, 3))
   
   # --- Define possible values for Delta and T ---
-  delta_vals <- 1:k   # Delta takes values from -4 to 4 (9 categories)
+  delta_vals <- -k:k   # Delta takes values from -4 to 4 (9 categories)
   T_vals     <- 1:k    # T takes values from 1 to 5 (5 categories)
   
   # Pre-allocate vectors for Delta and T.
@@ -31,7 +33,7 @@ simulate_data_dep <- function(n, k, seed = NULL) {
   # --- Sample Delta and T conditionally on the covariates --- 
   for (i in 1:n) {
     # For Delta:
-    weights_delta <- rep(1/k, k)
+    weights_delta <- rep(1/(2*k + 1), 2*k+1)
     Delta[i] <- sample(delta_vals, 1, prob = weights_delta)
     
     # For T:
@@ -52,9 +54,22 @@ simulate_data_dep <- function(n, k, seed = NULL) {
     race = race,
     X_num = X_num
   )
+  return(df)
+}
+
+#Assume the scores are in {1, 2, ..., score_max}
+transform_df <- function(df, score_max){
+
+  #check if there is non-sensicle data 
+  if(any(df$Delta < 1 & df$Indicator == 1)){ #no improvement but feel significantly better 
+    warning("Exists at least one patient with no score improvement but reports feeling significantly better")
+  }
+  if(any(df$Delta == (score_max-1) & df$Indicator == 0)){ 
+    warning("Exists at least one patient with max score improvement but does not feel significantly better")
+  }
   
-  df$L <- ifelse(df$Indicator == 1, 1, df$Delta) #double-check
-  df$R <- ifelse(df$Indicator == 1, df$Delta, k) #double-check
+  df$L <- ifelse(df$Indicator == 1, 0, df$Delta) #double check: I think this should be zero. 
+  df$R <- ifelse(df$Indicator == 1, df$Delta, score_max-1) 
   
   return(df)
 }
@@ -67,7 +82,7 @@ mean_from_surv <- function(model, cov = NULL) {
   Tbull_ints <- model$Tbull_ints
   
   # Extract survival curve estimates
-  S_curve <- model$S_curves[[1]] #double-check
+  S_curve <- model$S_curves[[1]] 
   k <- length(S_curve)
   
   # Compute probability masses from the survival drops:
@@ -77,11 +92,8 @@ mean_from_surv <- function(model, cov = NULL) {
     p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
   }
   
-  # Compute representative times: use the midpoint of each Turnbull interval
-  midpoints <- rowMeans(Tbull_ints)
-  
-  # Calculate the mean event time as the weighted average of the midpoints
-  mean_event_time <- sum(p * midpoints)
+  points <- Tbull_ints[, 2]
+  mean_event_time <- sum(p * points)
   
   return(mean_event_time)
 }
@@ -105,7 +117,7 @@ MIC <- function(df, method, user_formula = NULL, cov_input = NULL) {
   
   result <- list(
     model = model,
-    meanT = meanT,
+    meanT = meanT, #meanT can be conditioning, depending on function argument 
     meanD = meanD
   )
   
@@ -114,23 +126,21 @@ MIC <- function(df, method, user_formula = NULL, cov_input = NULL) {
 
 ```
 
-#Meta function
-```{r}
-
-```
 
 #Data simulation 
 ```{r}
-data <- simulate_data_dep(10000, 3, seed = 22)
-df <- subset(data, select = -T) #dataframe without T
-print(data)
+max_score <- 11
+data_oracle <- simulate_data_dep(10000, max_score)
+data_observed <- subset(data_oracle, select = -T) #dataframe without T
+df <- transform_df(data_observed, max_score)
+print(df)
 ```
 
 
 
 ```{r}
 #sp stands for semi-parametric
-fit_np <- ic_np(cbind(df$l, df$r))
+fit_np <- ic_np(cbind(df$L, df$R))
 fit_po <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "po") #The covariates does matter 
 fit_ph <- ic_sp(Surv(L, R, type = "interval2") ~ X_num + factor(race), data = df, model = "ph") 
 
@@ -162,7 +172,6 @@ mean_from_surv(fit_ph, newcov)
 
 #Exploiting the discreteness 
 ```{r}
-
 p1 <- nrow(df %>% filter(Delta ==1, Indicator == 1)) / nrow(df %>% filter(Delta ==1))
 s <- getSCurves(fit_np)$S_curves[[1]]
 s[2] = 1 - p1
