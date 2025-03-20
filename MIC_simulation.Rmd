@@ -353,9 +353,7 @@ npmle_sim <- function(n,m, setup){
     true_mean = mean(data_oracle$T)
     fit_np <- MIC(df, "np")
     vec[i] <- abs(true_mean - fit_np$meanT)
-    
-    #print(pmf(fit_np$model)$y)
-    
+  
     tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit_np$model)$y)
   }
   
@@ -403,76 +401,22 @@ sink()
 
 ```
 
+
+
+
+
+
+The hazard function is specified by $h(t|x) = \lambda \gamma t^{\gamma-1} \exp(x'\beta)$ 
+
+
+
 #ph simulation 
 ```{r}
 library(fastDummies)
 library(simsurv)
 
-#(1,...,10)
-
-simulate_data_ph_ <- function(n, seed = NULL, setup = 0) {
-  # 'race' with numeric codes 0, 1, 2 (treated as categorical)
-  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
-  # 'sex' with numeric codes 0 and 1 (treated as categorical)
-  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
-  
-  eta = c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 2, 3, 2, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3)
-  D_probs <- exp(eta) / sum(exp(eta))
-  Delta <- sample(-10:10, size = n, replace = TRUE, prob = D_probs)
-  
-  # Generate continuous covariate: Gaussian(80, variance = 5)
-  cont <- rnorm(n, mean = 80, sd = sqrt(5))
-  
-  # Create a data frame with the raw covariates and an identifier
-  cov_data <- data.frame(
-    id = 1:n,
-    race = race,
-    sex = sex,
-    cont = cont,
-    Delta = Delta
-  )
-  
-  # One-hot encode the categorical variables using model.matrix.
-  # This will create dummy variables and drop the intercept.
-  dummy_matrix <- model.matrix(~ race + sex, data = cov_data)[, -1]
-  
-  # Combine the one-hot encoded variables with the continuous variable and the id
-  cov_data_sim <- cbind(cov_data["id"], dummy_matrix, cont = cov_data$cont)
-
-  #Sample Delta and T conditionally on the covariates
-# Sample Delta and T conditionally on the covariates using switch
-  switch(as.character(setup),
-    "0" = { 
-      betas <- c(race1 = 0.5, race2 = -0.3, sex1 = 0.2, cont = 0.01)
-    },
-    stop("Invalid setup value")
-  )
-  
-  #baseline hazard parameters for Weibull 
-  lambda <- 0.05 
-  gamma <- 1.5   
-  
-  # Simulate continuous survival data using simsurv
-  sim_data <- simsurv(
-    lambdas = lambda, 
-    gammas = gamma, 
-    betas = betas, 
-    x = cov_data_sim
-  )
-    
-  # Discretize the continuous event times into integers 1 through 10.
-  # Values in (0,1] become 1, (1,2] become 2, etc.
-  # Values greater than 10 are capped at 10.
-  sim_data$T <- pmin(ceiling(sim_data$eventtime), 10)
-   
-  # Merge simulation output with the covariate data
-  final_data <- merge(sim_data, cov_data, by = "id", all.x = TRUE)
-  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
-  
-  return(final_data)
-}
-
-simulate_data_ph <- function(n, seed = NULL, setup = 0) {
+#score in (1,...,11)
+simulate_data_ph <- function(n, seed = NULL, setup = 0, cov = NULL) { #cov needs to a named list 
   # Optionally set seed if provided
   if (!is.null(seed)) set.seed(seed)
   
@@ -500,7 +444,6 @@ simulate_data_ph <- function(n, seed = NULL, setup = 0) {
   # One-hot encode the categorical variables using fastDummies.
   # This creates dummy variables for 'race' and 'sex'
   # remove_first_dummy = TRUE drops the first level to avoid multicollinearity
-  library(fastDummies)
   cov_data_dummy <- dummy_cols(
     cov_data,
     select_columns = c("race", "sex"),
@@ -516,21 +459,38 @@ simulate_data_ph <- function(n, seed = NULL, setup = 0) {
   switch(as.character(setup),
     "0" = { 
       betas <- c(race_1 = 0.5, race_2 = -0.3, sex_1 = 0.2, cont = 0.01)
+      lambda <- 0.05 
+      gamma <- 1.5 
     },
     stop("Invalid setup value")
   )
-    
-  # Baseline hazard parameters for Weibull 
-  lambda <- 0.05 
-  gamma <- 1.5   
   
-  # Simulate continuous survival data using simsurv
-  sim_data <- simsurv(
+  # Simulate continuous survival data using simsurv; support fixed partial covariates 
+  if(is.null(cov)){
+    sim_data <- simsurv(
     lambdas = lambda, 
     gammas = gamma, 
     betas = betas, 
     x = cov_data_sim
-  )
+    )
+  }else{ 
+    cov_data_sim_fixed <- cov_data_sim
+    for (name in names(cov)) {
+      if (name %in% names(cov_data_sim_fixed)) {
+        # Replace the column with a constant value for all n samples.
+        cov_data_sim_fixed[[name]] <- rep(cov[[name]], n)
+      } else {
+        stop(paste("Covariate", name, "not found in the data."))
+      }
+    }
+    sim_data <- simsurv(
+      lambdas = lambda, 
+      gammas = gamma, 
+      betas = betas, 
+      x = cov_data_sim_fixed,
+      cov_data = cov_data
+    )
+  }
     
   # Discretize the continuous event times into integers 1 through 10.
   sim_data$T <- pmin(ceiling(sim_data$eventtime), 10)
@@ -543,24 +503,38 @@ simulate_data_ph <- function(n, seed = NULL, setup = 0) {
 }
 
 
-ph_sim <- function(n,m, setup){ 
+ph_sim <- function(n,m, setup, cov = NULL){ 
   
-  vec <- numeric(m)
-  data_large <- simulate_data_ph(10000, setup)
+  #this can be either 
+  data_large <- simulate_data_ph(n = 10000, setup = setup, cov =cov)
   true_mean <- mean(data_large$T)
+  true_pmf <- as.numeric(table(data_large$T) / length(data_large$T))
+
+  vec <- numeric(m)
+  tv_dist_vec = numeric(m)
   
-  
-  
+  #models on restricted data;
   for(i in 1:m){
     data_oracle <- simulate_data_ph(n, setup)
     data_observed <- subset(data_oracle, select = -T) #dataframe without T
     df <- transform_df(data_observed, score_max = 11)
     
-    fit_ph <- MIC(df, user_formula = "cont + factor(sex) + factor(race)","ph")
-    vec[i] <- (true_mean - fit_ph$meanT) ** 2
+    fit_ph <- MIC(df, user_formula = "cont + factor(sex) + factor(race)","ph", cov)
+    vec[i] <- abs(true_mean - fit_ph$meanT)
+    tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit_np$model, cov)$y)
   }
+
+  #Generation of truth: race
+  result <- list(
+    abs_dif = vec,
+    tv_dist = mean(tv_dist_vec),
+    n = n,
+    m = m,
+    setup = setup
+  )
   
-  return(mean(vec, na.rm = TRUE)) #skips the nulls (caused by Max iteration reached)
+  class(result) <- "ph_sim"
+  return(result) #will need to skips the nulls (caused by Max iteration reached)
 }
 
 ```
@@ -579,7 +553,7 @@ fit_np <- MIC(df_ph, user_formula = "cont + factor(sex) + factor(race)","ph")
 
 fit_ph <- ic_sp(Surv(L, R, type = "interval2") ~ cont + factor(sex) + factor(race), data = df_ph, model = "ph") 
 
-error_ph <- ph_sim(100, 100, 0)
+error_ph <- ph_sim(n=1000, m=3, setup = 0)
 
 error_ph
 ```
