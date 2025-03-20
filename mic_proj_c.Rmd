@@ -28,65 +28,43 @@ simulate_data_dep <- function(n, max_score, seed = NULL, setup = 0) {
   T <- numeric(n)
   
   #Sample Delta and T conditionally on the covariates
-  if(setup == 0){
-    for (i in 1:n) {
-      weights_delta <- rep(1/(2*k + 1), 2*k+1)
-      Delta[i] <- sample(delta_vals, 1, prob = weights_delta)
+# Sample Delta and T conditionally on the covariates using switch
+  switch(as.character(setup),
+    "0" = {. #Uniform
+      for (i in 1:n) {
+        weights_delta <- rep(1/(2*k + 1), 2*k + 1)
+        Delta[i] <- sample(delta_vals, 1, prob = weights_delta)
+        
+        weights_T <- rep(1/k, k)
+        T[i] <- sample(T_vals, 1, prob = weights_T)
+      }
+    },
+    "1" = { #T depends on race, D does not depend on covariates at all
+      if (k != 4) {
+        stop("Delta must be supported on 1,2,3,4 for this simulation")
+      }
       
-      weights_T <- rep(1/k, k)
-      T[i] <- sample(T_vals, 1, prob = weights_T)
-    }
-  }else if(setup == 2){
-    
-    if(k != 4){
-      stop("Delta must be supported on 1,2,3,4 for this simulation")
-    }
-  
-    eta <- c(0, 2, 2, 1)
-    
-    eta_ <- c(0, 2, 3, -1, 3, 4, 1, 2, 0)
-    
-    vec1 <- c(2, 1, 0, 0)
-    vec2 <- c(0, 1, 2, 0)
-    vec3 <- c(0, 3, 1, 0)
-    mat <- cbind(vec1, vec2, vec3)
-    
-    T <- numeric(n)
-    for(i in 1:n) {
-      T_probs <- exp(eta * X[i] + mat[ , race[i] + 1])
-      T_probs <- T_probs / sum(T_probs)  
+      eta_ <- c(0, 0.2, 0.3, 0.5, 3, 2, 1, 0.5, 0.1)
       
-      D_probs <- exp(eta_ * X[i] + race[i])
-      D_probs <- D_probs / sum(D_probs) 
+      vec1 <- c(2, 1, 0, 0)
+      vec2 <- c(0, 1, 2, 0)
+      vec3 <- c(0, 3, 1, 0)
+      mat <- cbind(vec1, vec2, vec3)
       
-      T[i] <- sample(T_vals, size = 1, prob = T_probs)
-      Delta[i] <- sample(delta_vals, 1, prob = D_probs)
-    }
-  }else if(setup == 1){
+      for (i in 1:n) {
+        T_probs <- exp(mat[, race[i] + 1])
+        T_probs <- T_probs / sum(T_probs)
+        
+        D_probs <- exp(eta_)
+        D_probs <- D_probs / sum(D_probs)
+        
+        T[i] <- sample(T_vals, size = 1, prob = T_probs)
+        Delta[i] <- sample(delta_vals, 1, prob = D_probs)
+      }
+    },
     
-    if(k != 4){
-      stop("Delta must be supported on 1,2,3,4 for this simulation")
-    }
-    
-    eta_ <- c(0, 0.2, 0.3, 0.5, 3, 2, 1, 0.5, 0.1)
-    
-    vec1 <- c(2, 1, 0, 0)
-    vec2 <- c(0, 1, 2, 0)
-    vec3 <- c(0, 3, 1, 0)
-    mat <- cbind(vec1, vec2, vec3)
-    
-    T <- numeric(n)
-    for(i in 1:n) {
-      T_probs <- exp(mat[ , race[i] + 1])
-      T_probs <- T_probs / sum(T_probs)  
-      
-      D_probs <- exp(eta_)
-      D_probs <- D_probs / sum(D_probs) 
-      
-      T[i] <- sample(T_vals, size = 1, prob = T_probs)
-      Delta[i] <- sample(delta_vals, 1, prob = D_probs)
-    }
-  }
+    stop("Invalid setup value")
+  )
   
   #Compute the indicator variable (feeling significantly better)
   Indicator <- as.integer(Delta >= T) #indicator whether patient feel significantly improved 
@@ -142,6 +120,28 @@ transform_df <- function(df, score_max){
   return(df)
 }
 
+
+pmf <- function(model, cov = NULL) {
+  
+  model <- getSCurves(model, cov)  
+
+  # Extract Turnbull intervals (a k x 2 matrix)
+  Tbull_ints <- model$Tbull_ints
+  
+  # Extract survival curve estimates
+  S_curve <- model$S_curves[[1]] #rather strange, but this is how it goes
+  k <- length(S_curve)
+  
+  # Compute probability masses from the survival drops:
+  p <- numeric(k)
+  p[1] <- 1 - S_curve[1]
+  if (k > 1) {
+    p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
+  }
+  
+  result <- list("x" = Tbull_ints[, 2][-1], "y" = p[-1]) #[-1] removes the first elemnt of the vector 
+  return(result)
+}
 
 mean_from_surv <- function(model, cov = NULL) {
   
@@ -239,7 +239,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL) {
 #Data simulation 
 ```{r}
 max_score <- 5
-data_oracle <- simulate_data_dep(1000, max_score, setup = 1)
+data_oracle <- simulate_data_dep(100, max_score, setup = 1)
 data_observed <- subset(data_oracle, select = -T) #dataframe without T
 df <- transform_df(data_observed, max_score)
 print(df)
@@ -258,7 +258,6 @@ hist(T_race_2$T)
 hist(T_race_0$Delta)
 hist(T_race_1$Delta)
 hist(T_race_2$Delta)
-
 
 ```
 
@@ -296,12 +295,17 @@ fit_ph_
 
 #Model fitting with wapper, covariates included 
 ```{r}
-race_ <- 0
+race_ <- 2
 
-result <- MIC(df, method = "ph", user_formula = "X + factor(race)", cov = data.frame(race = race_, X = 1))
-result$meanT
+result_ph <- MIC(df, method = "ph", user_formula = "X + factor(race)", cov = data.frame(race = race_, X = 1))
+result_po <- MIC(df, method = "po", user_formula = "X + factor(race)", cov = data.frame(race = race_, X = 1))
+result_ph$meanT
+result_po$meanT
 
 truth <- true_mean_given_cov(10000, race = race_)
-print(truth)
+truth
+
+plot(pmf(result_ph$model, cov = data.frame(race = race_, X = 1))$x, pmf(result_ph$model, cov = data.frame(race = race_, X = 1))$y, "h", lwd = 2)
+#pmf(result_ph$model)$y
 ```
 

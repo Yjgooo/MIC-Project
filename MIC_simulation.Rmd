@@ -1,0 +1,595 @@
+---
+title: "MIC simulation"
+output: html_notebook
+---
+
+# functions
+```{r}
+library(dplyr)
+library(icenReg)
+
+# Assume the scores are in {1, 2, ..., score_max}
+
+#For NPMLE 
+#max_score set to 5 always
+simulate_data_np <- function(n, seed = NULL, setup = 0) {
+  
+  k <- 4 #so score goes from 1 to 5
+  
+  # Define possible values for Delta and T
+  delta_vals <- -k:k   # Delta takes values from -4 to 4 (9 categories)
+  T_vals     <- 1:k    # T takes values from 1 to 5 (5 categories)
+  
+  # Pre-allocate vectors for Delta and T.
+  max_score <- numeric(1)
+  Delta <- numeric(n)
+  T <- numeric(n)
+  trueT <- numeric(1)
+  
+  #Covariates generation 
+  sex <- sample(0:1, n, replace = TRUE, prob = rep(1/2, 2))
+  race <- sample(0:2, n, replace = TRUE, prob = rep(1/3, 3))
+  age <- rnorm(n, mean = 80, sd = 5)
+  
+  #Sample Delta and T conditionally on the covariates
+# Sample Delta and T conditionally on the covariates using switch
+  switch(as.character(setup),
+    "0" = { #Uniform T and delta 
+      
+      for (i in 1:n) {
+        weights_delta <- rep(1/(2*k + 1), 2*k + 1)
+        Delta[i] <- sample(delta_vals, 1, prob = weights_delta)
+        weights_T <- rep(1/k, k)
+        T[i] <- sample(T_vals, 1, prob = weights_T)
+      }
+    },
+      "1" = { #(X,D,T) mutually independent; allow for specification of marginal distribution of T and D 
+        
+        T_probs <- exp(c(2, 1, 0, 0))
+        T_probs <- T_probs / sum(T_probs)
+        
+        eta_ <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
+        D_probs <- exp(eta_) / sum(exp(eta_))
+        
+        T <- sample(T_vals, size = n, prob = T_probs, replace = TRUE)
+        Delta <- sample(delta_vals, n, prob = D_probs, replace = TRUE)
+        
+    },
+      "2" = { #T and D are not independent; T is inversely related to D; violation of the independence assumption 
+        
+      d_vec <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
+      D_probs <- exp(d_vec) / sum(exp(d_vec))
+      Delta <- sample(delta_vals, n, prob = D_probs, replace = TRUE)
+      
+      T <- pmin(4 - Delta + 1, 4) #max_score = 4
+    },
+      
+      "3" = { 
+        
+      eta_ <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
+      
+      vec1 <- c(2, 1, 0, 0)
+      vec2 <- c(0, 1, 2, 0)
+      vec3 <- c(0, 3, 1, 0)
+      
+      mat_race <- cbind(vec1, vec2, vec3)
+      
+      vec1_ <- c(0.3, 1, -0.3, -0.1)
+      vec2_ <- c(0, 0, 1, 0.3)
+      
+      mat_sex <- cbind(vec1_, vec2_)
+      
+      for (i in 1:n) {
+        T_probs <- exp(mat_race[, race[i] + 1] + mat_sex[, sex[i] + 1])
+        T_probs <- T_probs / sum(T_probs)
+        
+        D_probs <- exp(eta_)
+        D_probs <- D_probs / sum(D_probs)
+        
+        T[i] <- sample(T_vals, size = 1, prob = T_probs)
+        Delta[i] <- sample(delta_vals, 1, prob = D_probs)
+      }
+      
+    },
+    
+    stop("Invalid setup value")
+  )
+  
+  #Compute the indicator variable (feeling significantly better)
+  Indicator <- as.integer(Delta >= T) #indicator whether patient feel significantly improved 
+  
+  #Combine into a data frame
+  # 'race' remains as a numeric variable.
+  df <- data.frame(
+    Delta = Delta,
+    T = T,
+    Indicator = Indicator,
+    race = race,
+    sex = sex,
+    age = age
+  )
+  return(df)
+}
+
+
+#a rather obsolete funciton 
+#cov is a list
+#specific to the set upd
+true_mean_given_cov <- function(n, race){
+  if(race == 0){
+    v <- c(2, 1, 0, 0)
+  }else if(race == 1){
+    v <- c(0, 1, 2, 0)
+  }else if(race == 2){
+    v <- c(0, 3, 1, 0)
+  }else{
+    stop("Race must be in {0, 1, 2}")
+  }
+  
+  T <- numeric(n)
+  T_probs <- exp(v)
+  
+  for(i in 1:n){
+    T[i] <- sample(1:4 , size = 1, prob = T_probs)
+  }
+
+  return(mean(T))
+}
+
+#Assume the scores are in {1, 2, ..., score_max}
+transform_df <- function(df, score_max){
+
+  #check if there is non-sensicle data 
+  if(any(df$Delta < 1 & df$Indicator == 1)){ 
+    warning("Exists at least one patient with no score improvement but reports feeling significantly better")
+  }
+  if(any(df$Delta == (score_max-1) & df$Indicator == 0)){ 
+    warning("Exists at least one patient with max score improvement but does not feel significantly better")
+  }
+  
+  df$L <- ifelse(df$Indicator == 1, 0, df$Delta) # (0, score_max - 1] not (1, score_max - 1]
+  df$R <- ifelse(df$Indicator == 1, df$Delta, score_max-1) 
+  
+  return(df)
+}
+
+
+pmf <- function(model, cov = NULL) {
+  
+  model <- getSCurves(model, cov)  
+
+  # Extract Turnbull intervals (a k x 2 matrix)
+  Tbull_ints <- model$Tbull_ints
+  
+  # Extract survival curve estimates
+  S_curve <- model$S_curves[[1]] #rather strange, but this is how it goes
+  k <- length(S_curve)
+  
+  # Compute probability masses from the survival drops:
+  p <- numeric(k)
+  p[1] <- 1 - S_curve[1]
+  if (k > 1) {
+    p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
+  }
+  
+  result <- list("x" = Tbull_ints[, 2][-1], "y" = p[-1]) #[-1] removes the first element of the vector 
+  return(result)
+}
+
+mean_from_surv <- function(model, cov = NULL) {
+  
+  model <- getSCurves(model, cov)  
+
+  # Extract Turnbull intervals (a k x 2 matrix)
+  Tbull_ints <- model$Tbull_ints
+  
+  # Extract survival curve estimates
+  S_curve <- model$S_curves[[1]] #rather strange, but this is how it goes
+  k <- length(S_curve)
+  
+  # Compute probability masses from the survival drops:
+  p <- numeric(k)
+  p[1] <- 1 - S_curve[1]
+  if (k > 1) {
+    p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
+  }
+  
+  points <- Tbull_ints[, 2]
+  mean_event_time <- sum(p * points)
+  
+  return(mean_event_time)
+  
+}
+
+#written by ChatGPT
+#Utility function that extracts the cov from user_formula
+#Used for computing E[T] =E[E[T|X]]
+extract_covs <- function(formula_str) {
+  # Remove spaces
+  formula_str <- gsub(" ", "", formula_str)
+  
+  # Split the string by '+'
+  terms <- unlist(strsplit(formula_str, "\\+"))
+  
+  # For each term, remove the 'factor()' wrapper if it exists
+  terms <- sapply(terms, function(x) {
+    if (grepl("^factor\\(", x)) {
+      # Extract the content inside factor()
+      sub("^factor\\((.*)\\)$", "\\1", x)
+    } else {
+      x
+    }
+  })
+  return(terms)
+}
+
+MIC <- function(df, method, user_formula = NULL, cov = NULL) {
+  
+  if(method == "np"){
+    model <- ic_np(cbind(df$L, df$R))
+  } else if(method %in% c("po", "ph")){
+    full_formula <- as.formula(
+      paste("Surv(L, R, type = 'interval2') ~", user_formula)
+    )
+    model <- ic_sp(full_formula, data = df, model = method)
+  } else {
+    stop("Unsupported method: ", method)
+  }
+  
+  # Common operations for all methods
+  if(is.null(cov)){
+    
+    #E[E[T|X]] ~ 1/n \sum E[T_i | X_i]
+    n <- nrow(df)
+    v <- numeric(n)
+    cov_vec <- extract_covs(user_formula)
+    
+    for (i in 1:n){
+      v[i] <- mean_from_surv(model, df[i, cov_vec])
+    }
+    meanT <- mean(v) #empirical average 
+    
+  }else{
+    meanT <- mean_from_surv(model, cov) 
+  }
+  
+  meanD <- mean(df$Delta)
+  
+  result <- list(
+    model = model,
+    meanT = meanT, #meanT can be conditioned on the covariates, depending on user input
+    meanD = meanD
+  )
+  
+  #class(result) <- "MIC"
+  return(result)
+}
+
+tv_distance <- function(p, q) {
+  0.5 * sum(abs(p - q))
+}
+
+
+```
+
+#Inspection and sanity check
+```{r}
+#Data generation 
+data_oracle <- simulate_data_np(100, setup = 1)
+data_observed <- subset(data_oracle, select = -T) #dataframe without T
+print(data_oracle)
+df <- transform_df(data_observed, score_max = 5)
+print(df)
+
+
+#Histograms
+T_race_0 <- data_oracle%>%filter(race == 0)
+T_race_1 <- data_oracle%>%filter(race == 1)
+T_race_2 <- data_oracle%>%filter(race == 2)
+
+T_race_0
+
+hist(T_race_0$T) #The left most historgram is a bit weird 
+hist(T_race_1$T)
+hist(T_race_2$T)
+
+hist(T_race_0$Delta)
+hist(T_race_1$Delta)
+hist(T_race_2$Delta)
+
+
+#sp stands for semi-parametric
+fit_np_ <- MIC(df, "np")
+fit_po_ <- MIC(df, "po", "age + factor(sex) + factor(race)")
+fit_ph_ <- MIC(df, "ph", "age + factor(sex) + factor(race)")
+# factor(race)
+
+fit_np_
+fit_po_
+fit_ph_
+
+```
+
+#Model fitting with wapper, covariates included 
+```{r}
+race_ <- 2
+age <- 0
+
+result_ph <- MIC(df, method = "ph", user_formula = "age + factor(sex) + factor(race)", cov = data.frame(race = race_, sex = 0, age = age))
+result_po <- MIC(df, method = "po", user_formula = "age + factor(sex) + factor(race)", cov = data.frame(race = race_, sex = 0, age = age))
+
+result_ph
+
+result_ph$meanT
+result_po$meanT
+
+truth <- true_mean_given_cov(10000, race = race_)
+truth
+
+plot(pmf(result_ph$model, cov = data.frame(race = race_, sex = 0, age = age))$x, pmf(result_ph$model, cov = data.frame(race = race_, sex = 0, age = age))$y, "h", lwd = 2)
+#pmf(result_ph$model)$y
+```
+
+
+#NPMLE simulation 
+##Setting 0: 
+```{r}
+npmle_sim <- function(n,m, setup){ 
+  
+  #truth simulation 
+  vec <- numeric(m)
+  data_large <- simulate_data_np(100000, setup)
+  true_mean <- mean(data_large$T)
+  true_pmf <- as.numeric(table(data_large$T) / length(data_large$T))
+  
+  #repeated experiment
+  tv_dist_vec = numeric(m)
+  
+  for(i in 1:m){
+    data_oracle <- simulate_data_np(n, setup)
+    data_observed <- subset(data_oracle, select = -T) #dataframe without T
+    df <- transform_df(data_observed, score_max = 5)
+    
+    true_mean = mean(data_oracle$T)
+    fit_np <- MIC(df, "np")
+    vec[i] <- abs(true_mean - fit_np$meanT)
+    
+    #print(pmf(fit_np$model)$y)
+    
+    tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit_np$model)$y)
+  }
+  
+  result <- list(
+    abs_dif = vec,
+    tv_dist = mean(tv_dist_vec),
+    n = n,
+    m = m,
+    setup = setup
+  )
+  
+  class(result) <- "npmle_sim"
+  return(result)
+}
+
+print.npmle_sim <- function(x, ...) {
+  cat("NPMLE Simulation Results\n")
+  cat("------------------------\n")
+  cat("Parameters: n =", x$n, ", m =", x$m, ", setup =", x$setup, "\n\n")
+  cat("Mean absolute difference:", mean(x$abs_dif), "\n")
+  cat("95th percentile of absolute differences:", 
+      as.numeric(quantile(x$abs_dif, probs = 0.95)), "\n")
+  cat("Standard deviation of absolute differences:", sd(x$abs_dif), "\n")
+  cat("Average TV distance:", x$tv_dist, "\n")
+  
+  invisible(x)
+}
+
+sink("simulation_output_npmle.txt")
+
+print(npmle_sim(100, 100, 0))
+print(npmle_sim(500, 100, 0))
+print(npmle_sim(1000, 100, 0))
+
+print(npmle_sim(100, 100, 1))
+print(npmle_sim(500, 100, 1))
+print(npmle_sim(1000, 100, 1))
+
+print(npmle_sim(100, 100, 2))
+print(npmle_sim(500, 100, 2))
+print(npmle_sim(1000, 100, 2))
+
+sink()
+
+
+```
+
+#ph simulation 
+```{r}
+library(fastDummies)
+library(simsurv)
+
+#(1,...,10)
+
+simulate_data_ph_ <- function(n, seed = NULL, setup = 0) {
+  # 'race' with numeric codes 0, 1, 2 (treated as categorical)
+  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
+  # 'sex' with numeric codes 0 and 1 (treated as categorical)
+  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
+  
+  eta = c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 2, 3, 2, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3)
+  D_probs <- exp(eta) / sum(exp(eta))
+  Delta <- sample(-10:10, size = n, replace = TRUE, prob = D_probs)
+  
+  # Generate continuous covariate: Gaussian(80, variance = 5)
+  cont <- rnorm(n, mean = 80, sd = sqrt(5))
+  
+  # Create a data frame with the raw covariates and an identifier
+  cov_data <- data.frame(
+    id = 1:n,
+    race = race,
+    sex = sex,
+    cont = cont,
+    Delta = Delta
+  )
+  
+  # One-hot encode the categorical variables using model.matrix.
+  # This will create dummy variables and drop the intercept.
+  dummy_matrix <- model.matrix(~ race + sex, data = cov_data)[, -1]
+  
+  # Combine the one-hot encoded variables with the continuous variable and the id
+  cov_data_sim <- cbind(cov_data["id"], dummy_matrix, cont = cov_data$cont)
+
+  #Sample Delta and T conditionally on the covariates
+# Sample Delta and T conditionally on the covariates using switch
+  switch(as.character(setup),
+    "0" = { 
+      betas <- c(race1 = 0.5, race2 = -0.3, sex1 = 0.2, cont = 0.01)
+    },
+    stop("Invalid setup value")
+  )
+  
+  #baseline hazard parameters for Weibull 
+  lambda <- 0.05 
+  gamma <- 1.5   
+  
+  # Simulate continuous survival data using simsurv
+  sim_data <- simsurv(
+    lambdas = lambda, 
+    gammas = gamma, 
+    betas = betas, 
+    x = cov_data_sim
+  )
+    
+  # Discretize the continuous event times into integers 1 through 10.
+  # Values in (0,1] become 1, (1,2] become 2, etc.
+  # Values greater than 10 are capped at 10.
+  sim_data$T <- pmin(ceiling(sim_data$eventtime), 10)
+   
+  # Merge simulation output with the covariate data
+  final_data <- merge(sim_data, cov_data, by = "id", all.x = TRUE)
+  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
+  
+  return(final_data)
+}
+
+simulate_data_ph <- function(n, seed = NULL, setup = 0) {
+  # Optionally set seed if provided
+  if (!is.null(seed)) set.seed(seed)
+  
+  # 'race' with numeric codes 0, 1, 2 (treated as categorical)
+  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
+  # 'sex' with numeric codes 0 and 1 (treated as categorical)
+  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
+  
+  eta <- c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 3, 2.5, 2.5, 2.5, 2, 1, 1, 0.5, 0.5, 0.5, 0.3)
+  D_probs <- exp(eta) / sum(exp(eta))
+  Delta <- sample(-10:10, size = n, replace = TRUE, prob = D_probs)
+  
+  # Generate continuous covariate: Gaussian(80, variance = 5)
+  cont <- rnorm(n, mean = 80, sd = sqrt(5))
+  
+  # Create a data frame with the raw covariates and an identifier
+  cov_data <- data.frame(
+    id = 1:n,
+    race = race,
+    sex = sex,
+    cont = cont,
+    Delta = Delta
+  )
+  
+  # One-hot encode the categorical variables using fastDummies.
+  # This creates dummy variables for 'race' and 'sex'
+  # remove_first_dummy = TRUE drops the first level to avoid multicollinearity
+  library(fastDummies)
+  cov_data_dummy <- dummy_cols(
+    cov_data,
+    select_columns = c("race", "sex"),
+    remove_first_dummy = TRUE,
+    remove_selected_columns = TRUE
+  )
+  
+  # Combine the one-hot encoded variables with the id and continuous variable.
+  # The expected dummy columns are "race_1", "race_2", and "sex_1"
+  cov_data_sim <- cov_data_dummy[, c("id", "race_1", "race_2", "sex_1", "cont")]
+  
+  # Sample Delta and T conditionally on the covariates using a switch for setup
+  switch(as.character(setup),
+    "0" = { 
+      betas <- c(race_1 = 0.5, race_2 = -0.3, sex_1 = 0.2, cont = 0.01)
+    },
+    stop("Invalid setup value")
+  )
+    
+  # Baseline hazard parameters for Weibull 
+  lambda <- 0.05 
+  gamma <- 1.5   
+  
+  # Simulate continuous survival data using simsurv
+  sim_data <- simsurv(
+    lambdas = lambda, 
+    gammas = gamma, 
+    betas = betas, 
+    x = cov_data_sim
+  )
+    
+  # Discretize the continuous event times into integers 1 through 10.
+  sim_data$T <- pmin(ceiling(sim_data$eventtime), 10)
+   
+  # Merge simulation output with the original covariate data
+  final_data <- merge(sim_data, cov_data, by = "id", all.x = TRUE)
+  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
+  
+  return(final_data)
+}
+
+
+ph_sim <- function(n,m, setup){ 
+  
+  vec <- numeric(m)
+  data_large <- simulate_data_ph(10000, setup)
+  true_mean <- mean(data_large$T)
+  
+  
+  
+  for(i in 1:m){
+    data_oracle <- simulate_data_ph(n, setup)
+    data_observed <- subset(data_oracle, select = -T) #dataframe without T
+    df <- transform_df(data_observed, score_max = 11)
+    
+    fit_ph <- MIC(df, user_formula = "cont + factor(sex) + factor(race)","ph")
+    vec[i] <- (true_mean - fit_ph$meanT) ** 2
+  }
+  
+  return(mean(vec, na.rm = TRUE)) #skips the nulls (caused by Max iteration reached)
+}
+
+```
+
+
+```{r}
+
+df_ph_oracle <- simulate_data_ph(1000, setup = 0)
+df_ph <- transform_df(df_ph_oracle, 11)
+df_ph
+
+hist(df_ph_oracle$T)
+hist(df_ph_oracle$Delta)
+
+fit_np <- MIC(df_ph, user_formula = "cont + factor(sex) + factor(race)","ph")
+
+fit_ph <- ic_sp(Surv(L, R, type = "interval2") ~ cont + factor(sex) + factor(race), data = df_ph, model = "ph") 
+
+error_ph <- ph_sim(100, 100, 0)
+
+error_ph
+```
+
+
+
+
+```{r}
+
+obs <- c(1, 2, 1, 3, 2, 2, 4, 1, 3, 3, 2)  # example observations
+pmf <- table(obs) / length(obs)
+print(as.numeric(pmf))
+```

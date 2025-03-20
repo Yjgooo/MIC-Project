@@ -1,0 +1,72 @@
+NPMLE Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+Mean absolute difference: 0.1668681 
+95th percentile of absolute differences: 0.4118157 
+Standard deviation of absolute differences: 0.1410146 
+Average TV distance: 0.244216 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+Mean absolute difference: 0.08202651 
+95th percentile of absolute differences: 0.202684 
+Standard deviation of absolute differences: 0.06680158 
+Average TV distance: 0.1168658 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+Mean absolute difference: 0.05504393 
+95th percentile of absolute differences: 0.1267166 
+Standard deviation of absolute differences: 0.03994249 
+Average TV distance: 0.08634053 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 1 
+
+Mean absolute difference: 0.1725576 
+95th percentile of absolute differences: 0.3906039 
+Standard deviation of absolute differences: 0.1187446 
+Average TV distance: 0.2415998 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 1 
+
+Mean absolute difference: 0.0771741 
+95th percentile of absolute differences: 0.1707383 
+Standard deviation of absolute differences: 0.05200366 
+Average TV distance: 0.1073412 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 1 
+
+Mean absolute difference: 0.05317809 
+95th percentile of absolute differences: 0.1128273 
+Standard deviation of absolute differences: 0.03613316 
+Average TV distance: 0.08403556 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 2 
+
+Mean absolute difference: 0.1744451 
+95th percentile of absolute differences: 0.4296768 
+Standard deviation of absolute differences: 0.1447864 
+Average TV distance: 0.239459 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 2 
+
+Mean absolute difference: 0.07944124 
+95th percentile of absolute differences: 0.1939923 
+Standard deviation of absolute differences: 0.05825857 
+Average TV distance: 0.1205337 
+NPMLE Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 2 
+
+Mean absolute difference: 0.05671443 
+95th percentile of absolute differences: 0.1437636 
+Standard deviation of absolute differences: 0.04392919 
+Average TV distance: 0.08654947 
