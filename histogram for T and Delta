@@ -1,0 +1,75 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+def simulate_pain_data(n, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
+        
+    # Define possible values
+    Delta_vals = np.arange(-10, 11)  # Δ from -10 to 10
+    T_vals = np.arange(1, 11)         # T from 1 to 10
+    
+    # Simulate covariates
+    sex = np.random.choice([0, 1], n)         # binary indicator for sex
+    race = np.random.choice([0, 1, 2], n)       # e.g., race groups coded 0,1,2
+    age = np.random.normal(65, 10, n)           # age with mean 65 and sd 10
+    
+    # Pre-allocate arrays
+    Delta = np.empty(n, dtype=int)
+    T = np.empty(n, dtype=int)
+    
+    for i in range(n):
+        # Baseline probabilities for Δ: higher weight near 0
+        base_probs = np.exp(-np.abs(Delta_vals) / 3)
+        
+        # Adjust probabilities based on age (older patients may show less improvement)
+        if age[i] > 65:
+            age_adj = np.exp(-np.abs(Delta_vals + 2) / 3)
+        else:
+            age_adj = np.ones_like(Delta_vals)
+            
+        Delta_probs = base_probs * age_adj
+        Delta_probs /= Delta_probs.sum()
+        
+        Delta[i] = np.random.choice(Delta_vals, p=Delta_probs)
+        
+        # Simulate T (minimal important change) conditionally on Δ and covariates.
+        # For example, a larger Δ (greater pain improvement) may lead to a lower T.
+        mean_T = 6 - 0.2 * Delta[i] + 0.5 * sex[i] - 0.3 * (race[i] - 1)
+        
+        # Compute a normal density for T values with standard deviation 1.
+        T_density = norm.pdf(T_vals, loc=mean_T, scale=1)
+        T_probs = T_density / T_density.sum()
+        
+        T[i] = np.random.choice(T_vals, p=T_probs)
+    
+    # Indicator: whether the change in pain (Δ) meets or exceeds the minimal important change (T)
+    Indicator = (Delta >= T).astype(int)
+    
+    # Combine into a DataFrame
+    df = pd.DataFrame({
+        'Delta': Delta,
+        'T': T,
+        'Indicator': Indicator,
+        'sex': sex,
+        'race': race,
+        'age': age
+    })
+    return df
+
+# Simulate the data
+df = simulate_pain_data(1000, seed=123)
+
+# Plotting the two-dimensional histogram
+plt.figure(figsize=(8, 6))
+# Define bin edges so each integer value gets its own bin
+x_bins = np.arange(0.5, 11.5, 1)     # for T: 1 to 10
+y_bins = np.arange(-10.5, 11.5, 1)    # for Delta: -10 to 10
+plt.hist2d(df['T'], df['Delta'], bins=[x_bins, y_bins], cmap='viridis')
+plt.colorbar(label='Counts')
+plt.xlabel("T (Minimal Important Change)")
+plt.ylabel("Delta (Change in Pain)")
+plt.title("2D Histogram of T and Delta")
+plt.show()
