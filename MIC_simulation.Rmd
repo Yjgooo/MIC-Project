@@ -5,6 +5,7 @@ output: html_notebook
 
 # MIC "package": contains the wrapper MIC and utility functions 
 ```{r}
+library(pROC)
 library(dplyr)
 library(icenReg)
 
@@ -17,36 +18,66 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL) {
       paste("Surv(L, R, type = 'interval2') ~", user_formula)
     )
     model <- ic_sp(full_formula, data = df, model = method)
+  } else if(method %in% c("roc", "pred", "pred.adj")){
+    if(method == "roc"){
+      library(pROC)
+      rocobj <- roc(Indicator ~ Delta, data = df, quiet = TRUE)
+      cuty <- coords(rocobj, x = "best", input = "threshold", ret = "threshold", 
+                     best.method = "youden", transpose = TRUE)
+      threshold <- sample(cuty, 1)
+      model <- list(method = "roc", threshold = threshold)
+      
+    } else if(method == "pred"){
+      prev <- mean(df$Indicator)
+      logods <- log(prev/(1 - prev))
+      fit <- glm(Indicator ~ Delta, data = df, family = "binomial")
+      c_ <- coef(fit)[1]
+      b_ <- coef(fit)[2]
+      threshold <- (logods - c_) / b_
+      model <- list(method = "pred", fit = fit, threshold = threshold)
+      
+    } else if(method == "pred.adj"){
+      prev <- mean(df$Indicator)
+      logods <- log(prev/(1 - prev))
+      fit <- glm(Indicator ~ Delta, data = df, family = "binomial")
+      c_ <- coef(fit)[1]
+      b_ <- coef(fit)[2]
+      mic.pred <- (logods - c_) / b_
+      SD <- sd(df$Delta)
+      Cor <- cor(df$Delta, df$Indicator)
+      Scf <- 0.09 * SD + 0.103 * SD * Cor
+      threshold <- mic.pred - Scf * logods
+      model <- list(method = "pred.adj", fit = fit, threshold = threshold)
+    }
   } else {
     stop("Unsupported method: ", method)
   }
   
-  # Common operations for all methods
-  if(is.null(cov)){
-    
-    #E[E[T|X]] ~ 1/n \sum E[T_i | X_i]
-    n <- nrow(df)
-    v <- numeric(n)
-    cov_vec <- extract_covs(user_formula)
-    
-    for (i in 1:n){
-      v[i] <- mean_from_surv(model, df[i, cov_vec])
+  # For the new methods, we use the estimated threshold as meanT.
+  if(method %in% c("roc", "pred", "pred.adj")){
+    meanT <- model$threshold
+  } else {
+    if(is.null(cov)){
+      n <- nrow(df)
+      v <- numeric(n)
+      cov_vec <- extract_covs(user_formula)
+      for (i in 1:n){
+        v[i] <- mean_from_surv(model, df[i, cov_vec])
+      }
+      meanT <- mean(v)
+    } else {
+      meanT <- mean_from_surv(model, cov)
     }
-    meanT <- mean(v) #empirical average 
-    
-  }else{
-    meanT <- mean_from_surv(model, cov) 
   }
   
   meanD <- mean(df$Delta)
   
   result <- list(
     model = model,
-    meanT = meanT, #meanT can be conditioned on the covariates, depending on user input
+    meanT = meanT,
     meanD = meanD
   )
   
-  #class(result) <- "MIC"
   return(result)
 }
 
@@ -61,30 +92,6 @@ tv_distance <- function(p, q) {
 #max_score set to 5 always
 
 
-
-#a rather obsolete funciton 
-#cov is a list
-#specific to the set upd
-true_mean_given_cov <- function(n, race){
-  if(race == 0){
-    v <- c(2, 1, 0, 0)
-  }else if(race == 1){
-    v <- c(0, 1, 2, 0)
-  }else if(race == 2){
-    v <- c(0, 3, 1, 0)
-  }else{
-    stop("Race must be in {0, 1, 2}")
-  }
-  
-  T <- numeric(n)
-  T_probs <- exp(v)
-  
-  for(i in 1:n){
-    T[i] <- sample(1:4 , size = 1, prob = T_probs)
-  }
-
-  return(mean(T))
-}
 
 #Assume the scores are in {1, 2, ..., score_max}
 transform_df <- function(df, score_max){
@@ -354,7 +361,11 @@ print.np_sim <- function(x, ...) {
 
 #np sanity check
 ```{r}
-print(npmle_sim(100, 2, 0))
+df <- simulate_data_np(n=500)
+df <- transform_df(df, score_max = 11)
+head(df)
+result_ <- MIC(df, "pred")
+result_
 ```
 
 
@@ -367,93 +378,6 @@ The hazard function is specified by $h(t|x) = \lambda \gamma t^{\gamma-1} \exp(x
 ```{r}
 library(fastDummies)
 library(simsurv)
-
-#score in (1,...,11)
-simulate_data_ph_ <- function(n, seed = NULL, setup = 0, cov = NULL) { #cov needs to a named list 
-  # Optionally set seed if provided
-  if (!is.null(seed)) set.seed(seed)
-  
-  # 'race' with numeric codes 0, 1, 2 (treated as categorical)
-  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
-  # 'sex' with numeric codes 0 and 1 (treated as categorical)
-  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
-  
-  eta <- c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 3, 2.5, 2.5, 2.5, 2, 1, 1, 0.5, 0.5, 0.5, 0.3)
-  D_probs <- exp(eta) / sum(exp(eta))
-  Delta <- sample(-10:10, size = n, replace = TRUE, prob = D_probs)
-  
-  # Generate continuous covariate: Gaussian(80, variance = 5)
-  cont <- rnorm(n, mean = 80, sd = sqrt(5))
-  
-  # Create a data frame with the raw covariates and an identifier
-  cov_data <- data.frame(
-    id = 1:n,
-    race = race,
-    sex = sex,
-    cont = cont,
-    Delta = Delta
-  )
-  
-  # One-hot encode the categorical variables using fastDummies.
-  # This creates dummy variables for 'race' and 'sex'
-  # remove_first_dummy = TRUE drops the first level to avoid multicollinearity
-  cov_data_dummy <- dummy_cols(
-    cov_data,
-    select_columns = c("race", "sex"),
-    remove_first_dummy = TRUE,
-    remove_selected_columns = TRUE
-  )
-  
-  # Combine the one-hot encoded variables with the id and continuous variable.
-  # The expected dummy columns are "race_1", "race_2", and "sex_1"
-  cov_data_sim <- cov_data_dummy[, c("id", "race_1", "race_2", "sex_1", "cont")]
-  
-  # Sample Delta and T conditionally on the covariates using a switch for setup
-  switch(as.character(setup),
-    "0" = { 
-      betas <- c(race_1 = 0.5, race_2 = -0.3, sex_1 = 0.2, cont = 0.01)
-      lambda <- 0.05 
-      gamma <- 1.5 
-    },
-    stop("Invalid setup value")
-  )
-  
-  # Simulate continuous survival data using simsurv; support fixed partial covariates 
-  if(is.null(cov)){
-    sim_data <- simsurv(
-    lambdas = lambda, 
-    gammas = gamma, 
-    betas = betas, 
-    x = cov_data_sim
-    )
-  }else{ 
-    cov_data_sim_fixed <- cov_data_sim
-    for (name in names(cov)) {
-      if (name %in% names(cov_data_sim_fixed)) {
-        # Replace the column with a constant value for all n samples.
-        cov_data_sim_fixed[[name]] <- rep(cov[[name]], n)
-      } else {
-        stop(paste("Covariate", name, "not found in the data."))
-      }
-    }
-    sim_data <- simsurv(
-      lambdas = lambda, 
-      gammas = gamma, 
-      betas = betas, 
-      x = cov_data_sim_fixed,
-      cov_data = cov_data
-    )
-  }
-    
-  # Discretize the continuous event times into integers 1 through 10.
-  sim_data$T <- pmin(ceiling(sim_data$eventtime), 10)
-   
-  # Merge simulation output with the original covariate data
-  final_data <- merge(sim_data, cov_data, by = "id", all.x = TRUE)
-  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
-  
-  return(final_data)
-}
 
 simulate_data_ph <- function(n, seed = NULL, setup = 0, cov = NULL) {
   if (!is.null(seed)) set.seed(seed)
@@ -778,24 +702,6 @@ result <- print(po_sim(n=10000, m=10, setup = 0))
 ```
 
 
-#predictive modeling method
-```{r}
-#predictive modeling method
-pred_model<-function(dat){
-    prev <- mean(dat$Indicator)
-    logods <- log(prev/(1-prev))
-    fit <- glm(Indicator ~ Delta, data = dat, family = "binomial")
-    
-    c <- coef(fit)[1]
-    b <- coef(fit)[2]
-    
-    mic.pred <- (logods-c)/b
-    unname(mic.pred)
-}
-
-```
-
-
 
 #Generic function for simulation
 
@@ -809,40 +715,46 @@ generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np",
   # Use a large sample to get the true distribution of T
   data_large <- sim(n = 10000, setup = setup, cov = cov)
   true_mean <- mean(data_large$T)
-    
+  
   full_support <- 1:10
   true_pmf <- prop.table(table(factor(data_large$T, levels = full_support)))
   
   vec <- numeric(m)
   tv_dist_vec <- numeric(m)
-  bias <- numeric(m)
   
   # Models on restricted data
   for(i in 1:m) {
-    # Note: the cov parameter is not passed here to mimic the original function.
+    # Note: cov parameter is not passed here to mimic the original function.
     data_oracle <- sim(n = n, setup = setup)
-    data_observed <- subset(data_oracle, select = -T) # dataframe without T
+    data_observed <- subset(data_oracle, select = -T)  # dataframe without T
     df_ <- transform_df(data_observed, score_max = 11)
     
-    # Use the specified model in the MIC call
-    fit <- MIC(df_, user_formula = "cont + factor(sex) + factor(race)", model, cov)
+    # For new methods, do not pass user_formula
+    if(model %in% c("roc", "pred", "pred.adj")){
+      fit <- MIC(df_, method = model, cov = cov)
+    } else {
+      fit <- MIC(df_, user_formula = "cont + factor(sex) + factor(race)", method = model, cov = cov)
+    }
     
     vec[i] <- abs(fit$meanT - true_mean)
     
-    tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit$model, cov, max_time = 10)$y)
-      
+    # For new methods, density estimates are not provided so TV distance is NA.
+    if(model %in% c("roc", "pred", "pred.adj")){
+      tv_dist_vec[i] <- NA
+    } else {
+      tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit$model, cov, max_time = 10)$y)
+    }
   }
   
   result <- list(
+    model = model, 
     dif = vec,
-    tv_dist = tv_dist_vec, # abs_dif and tv_dist are vectors
+    tv_dist = tv_dist_vec,  # For new methods this will be NA
     n = n,
     m = m,
     setup = setup
   )
   
-  
-  #class(result) <- paste0(model, "_sim")
   class(result) <- "mega"
   return(result)
 }
@@ -852,7 +764,7 @@ run_simulations <- function(setup, cov = NULL, m = 200) {
   # Define the sample sizes and simulation model choices
   n_values <- c(100, 500, 1000)
   sim_models <- c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real")
-  models <- c("po", "ph", "np")
+  models <- c("np", "ph", "po", "roc", "pred", "pred.adj")
   
   # Container to store results for each combination
   results_list <- list()
@@ -879,27 +791,32 @@ run_simulations <- function(setup, cov = NULL, m = 200) {
 }
 
 print.mega <- function(x) {
-  cat("po Simulation Results\n")
+  cat(x$model, "Simulation Results\n")
   cat("------------------------\n")
   cat("Parameters: n =", x$n, ", m =", x$m, ", setup =", x$setup, "\n\n")
-  cat("MSE:", mean((x$dif)**2, na.rm = TRUE), "\n")
+  
+  cat("MSE:", mean((x$dif)^2, na.rm = TRUE), "\n")
   cat("95th percentile of MSE:", 
-      as.numeric(quantile((x$dif)**2, probs = 0.95, na.rm = TRUE)), "\n")
+      as.numeric(quantile((x$dif)^2, probs = 0.95, na.rm = TRUE)), "\n")
   cat("MAD:", mean(abs(x$dif), na.rm = TRUE), "\n")
   cat("95th percentile of MADs:", 
-      as.numeric(quantile(abs(x$abs_dif), probs = 0.95, na.rm = TRUE)), "\n")
-  cat("Average TV distance:", mean(x$tv_dist, na.rm = TRUE), "\n")
+      as.numeric(quantile(abs(x$dif), probs = 0.95, na.rm = TRUE)), "\n")
+  
+  if(all(is.na(x$tv_dist))) {
+    cat("Average TV distance: Not available\n")
+  } else {
+    cat("Average TV distance:", mean(x$tv_dist, na.rm = TRUE), "\n")
+  }
   
   invisible(x)
 }
-
 
 ```
 
 
 ```{r}
 time_taken <- system.time({
-  mega_result <- run_simulations(setup = 0, m = 200)
+  mega_result <- run_simulations(setup = 0, m = 1)
 })
 
 #save(mega_result, file = "mega_result.RData")
