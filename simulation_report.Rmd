@@ -1,0 +1,26 @@
+---
+title: "Simulation Report"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+
+source("../simulation_functions/MIC_utils.R")
+source("../simulation_functions/np_simulation.R")
+source("../simulation_functions/ph_simulation.R")
+source("../simulation_functions/po_simulation.R")
+source("../simulation_functions/real_simulation.R")
+source("../simulation_functions/generic_simulation.R")
+
+
+library(ggplot2)
+```
+
+
+```{r}
+result<- run_simulations(setup = 0, m = 1)
+print(result)
+
+save(result, file = "Mar28_2025_simulation.RData")
+
+```
