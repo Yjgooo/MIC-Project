@@ -5,12 +5,12 @@ output: html_notebook
 
 ```{r setup, include=FALSE}
 
-source("../simulation_functions/MIC_utils.R")
-source("../simulation_functions/np_simulation.R")
-source("../simulation_functions/ph_simulation.R")
-source("../simulation_functions/po_simulation.R")
-source("../simulation_functions/real_simulation.R")
-source("../simulation_functions/generic_simulation.R")
+source("simulation_functions/MIC_utils.R")
+source("simulation_functions/np_simulation.R")
+source("simulation_functions/ph_simulation.R")
+source("simulation_functions/po_simulation.R")
+source("simulation_functions/real_simulation.R")
+source("simulation_functions/generic_simulation.R")
 
 
 library(ggplot2)
@@ -18,9 +18,29 @@ library(ggplot2)
 
 
 ```{r}
-result<- run_simulations(setup = 0, m = 1)
+
+df <- transform_df(simulate_data_ph(n = 1000), score_max = 11)
+
+barplot(table(df$T),
+        main = "Bar Plot of Discrete Event Times",
+        xlab = "Event Time (T)",
+        ylab = "Frequency",
+        col = "lightblue")
+
+barplot(table(df$Delta),
+        main = "Bar Plot of Delta",
+        xlab = "Delta",
+        ylab = "Frequency",
+        col = "lightblue")
+
+
+```
+
+
+```{r}
+result<- run_simulations(setup = 0, m = 200)
 print(result)
 
-save(result, file = "Mar28_2025_simulation.RData")
+save(result, file = "simulation_results/RData/April_3_2025_simulation.RData")
 
 ```

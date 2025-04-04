@@ -55,7 +55,7 @@ run_simulations <- function(setup, cov = NULL, m = 200) {
   # Define the sample sizes and simulation model choices
   n_values <- c(100, 500, 1000)
   sim_models <- c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real")
-  models <- c("np", "ph", "po", "roc", "pred", "pred.adj")
+  models <- c("np", "ph", "po", "pred", "pred.adj")
   
   # Container to store results for each combination
   results_list <- list()
