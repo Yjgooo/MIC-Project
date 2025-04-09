@@ -2,8 +2,10 @@ library(pROC)
 library(dplyr)
 library(icenReg)
 
-MIC <- function(df, method, user_formula = NULL, cov = NULL) {
+MIC <- function(df, method, user_formula = NULL, cov = NULL, 
+                conf_level = 0.95, nboot = 10, boot = FALSE) {
   
+  # Fit the model based on the specified method.
   if(method == "np"){
     model <- ic_np(cbind(df$L, df$R))
   } else if(method %in% c("po", "ph")){
@@ -46,7 +48,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL) {
     stop("Unsupported method: ", method)
   }
   
-  # For the new methods, we use the estimated threshold as meanT.
+  # Compute meanT.
   if(method %in% c("roc", "pred", "pred.adj")){
     meanT <- model$threshold
   } else {
@@ -71,9 +73,23 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL) {
     meanD = meanD
   )
   
+  # Only perform bootstrap if boot == TRUE.
+  if(boot){
+    boot_estimates <- replicate(nboot, {
+      indices <- sample(1:nrow(df), replace = TRUE)
+      # Call MIC with boot = FALSE to avoid recursion of bootstrap
+      res_boot <- MIC(df[indices, ], method, user_formula, cov, conf_level, nboot, boot = FALSE)
+      return(res_boot$meanT)
+    })
+    alpha <- (1 - conf_level) / 2
+    CI <- quantile(boot_estimates, probs = c(alpha, 1 - alpha), na.rm = TRUE)
+    result$CI <- CI
+  }
+  
   return(result)
 }
 
+#TV Distance
 tv_distance <- function(p, q) {
   0.5 * sum(abs(p - q))
 }

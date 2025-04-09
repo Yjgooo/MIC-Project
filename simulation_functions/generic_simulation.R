@@ -1,9 +1,8 @@
-#separation of the sim_model and fit model
 generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np", model = "np") { 
   # Retrieve the simulation function based on the provided name
   sim <- get(sim_model)
   
-  # Use a large sample to get the true distribution of T
+  # Use a large sample to get the true distribution of T and true mean
   data_large <- sim(n = 10000, setup = setup, cov = cov)
   true_mean <- mean(data_large$T)
   
@@ -12,6 +11,7 @@ generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np",
   
   vec <- numeric(m)
   tv_dist_vec <- numeric(m)
+  coverage_vec <- numeric(m)  # Vector to store coverage indicator (0 if CI covers, 1 otherwise)
   
   # Models on restricted data
   for(i in 1:m) {
@@ -35,12 +35,22 @@ generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np",
     } else {
       tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit$model, cov, max_time = 10)$y)
     }
+    
+    # Compute coverage indicator if CI is available.
+    # Here, we assume that fit$CI is a two-element vector (lower and upper bounds).
+    if(!is.null(fit$CI) && !any(is.na(fit$CI))) {
+      coverage_vec[i] <- ifelse(true_mean >= fit$CI[1] && true_mean <= fit$CI[2], 0, 1)
+    } else {
+      coverage_vec[i] <- NA
+    }
   }
   
   result <- list(
     model = model, 
     dif = vec,
     tv_dist = tv_dist_vec,  # For new methods this will be NA
+    coverage = coverage_vec, # Coverage indicator for each replication
+    true_mean = true_mean,   # Store the true mean for reference
     n = n,
     m = m,
     setup = setup
@@ -97,6 +107,15 @@ print.mega <- function(x) {
     cat("Average TV distance: Not available\n")
   } else {
     cat("Average TV distance:", mean(x$tv_dist, na.rm = TRUE), "\n")
+  }
+  
+  # Print the coverage error for the CI for the mean
+  if(!all(is.na(x$coverage))) {
+    # Compute the average coverage error: the proportion of replicates in which the CI did NOT cover the true mean.
+    cov_error <- mean(x$coverage, na.rm = TRUE)
+    cat("Coverage error (proportion of replicates where CI did NOT cover the true mean):", cov_error, "\n")
+  } else {
+    cat("Coverage error: Not available\n")
   }
   
   invisible(x)

@@ -4,6 +4,7 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
+library(ggplot2)
 
 source("simulation_functions/MIC_utils.R")
 source("simulation_functions/np_simulation.R")
@@ -11,15 +12,15 @@ source("simulation_functions/ph_simulation.R")
 source("simulation_functions/po_simulation.R")
 source("simulation_functions/real_simulation.R")
 source("simulation_functions/generic_simulation.R")
-
-
-library(ggplot2)
 ```
 
-
+#Data visualization 
 ```{r}
 
-df <- transform_df(simulate_data_ph(n = 1000), score_max = 11)
+df <- transform_df(simulate_data_po(n = 10000), score_max = 11)
+df <- df %>% filter(race == 2)
+
+mean(df$T)
 
 barplot(table(df$T),
         main = "Bar Plot of Discrete Event Times",
@@ -33,6 +34,15 @@ barplot(table(df$Delta),
         ylab = "Frequency",
         col = "lightblue")
 
+cor(df$T, df$Delta)
+
+fit <- MIC(df, method = "np")
+fit_ <- MIC(df, method = "pred.adj")
+print(fit)
+print(fit_)
+
+data <- simulate_data_ph(10000, seed = 1)
+aggregate(T ~ race, data = data, mean)
 
 ```
 
@@ -41,6 +51,7 @@ barplot(table(df$Delta),
 result<- run_simulations(setup = 0, m = 200)
 print(result)
 
-save(result, file = "simulation_results/RData/April_3_2025_simulation.RData")
+#save(result, file = "simulation_results/RData/April_11_2025_simulation.RData")
 
 ```
+

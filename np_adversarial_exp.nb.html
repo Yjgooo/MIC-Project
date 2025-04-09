@@ -11,7 +11,7 @@
 
 
 
-<title>Simulation Report</title>
+<title>R Notebook</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,40 +1746,30 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Simulation Report</h1>
+<h1 class="title toc-ignore">R Notebook</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
-<!-- rnb-text-begin -->
-<p>#Data visualization</p>
-<!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVhbihkZiRUKVxuXG5gYGAifQ== -->
-<pre class="r"><code>mean(df$T)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDguNjQ0NzM3XG4ifQ== -->
-<pre><code>[1] 8.644737</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
+toolbar or by pressing <em>Cmd+Option+I</em>.</p>
+<p>When you save the notebook, an HTML file containing the code and
+output will be saved alongside it (click the <em>Preview</em> button or
+press <em>Cmd+Shift+K</em> to preview the HTML file).</p>
+<p>The preview shows you a rendered HTML copy of the contents of the
+editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
+run any R code chunks. Instead, the output of the chunk when it was last
+run in the editor is displayed.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVzdWx0PC0gcnVuX3NpbXVsYXRpb25zKHNldHVwID0gMCwgbSA9IDIpXG5wcmludChyZXN1bHQpXG5cbiNzYXZlKHJlc3VsdCwgZmlsZSA9IFwic2ltdWxhdGlvbl9yZXN1bHRzL1JEYXRhL0FwcmlsXzNfMjAyNV9zaW11bGF0aW9uLlJEYXRhXCIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>result&lt;- run_simulations(setup = 0, m = 2)
-print(result)
-
-#save(result, file = &quot;simulation_results/RData/April_3_2025_simulation.RData&quot;)
-</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2ltdWxhdGlvbiBSZXBvcnQiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQpsaWJyYXJ5KGdncGxvdDIpCgpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL01JQ191dGlscy5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9ucF9zaW11bGF0aW9uLlIiKQpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL3BoX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvcG9fc2ltdWxhdGlvbi5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9yZWFsX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvZ2VuZXJpY19zaW11bGF0aW9uLlIiKQpgYGAKCiNEYXRhIHZpc3VhbGl6YXRpb24gCmBgYHtyfQoKZGYgPC0gdHJhbnNmb3JtX2RmKHNpbXVsYXRlX2RhdGFfcG8obiA9IDEwMDAwKSwgc2NvcmVfbWF4ID0gMTEpCmRmIDwtIGRmICU+JSBmaWx0ZXIocmFjZSA9PSAyKQoKbWVhbihkZiRUKQoKYmFycGxvdCh0YWJsZShkZiRUKSwKICAgICAgICBtYWluID0gIkJhciBQbG90IG9mIERpc2NyZXRlIEV2ZW50IFRpbWVzIiwKICAgICAgICB4bGFiID0gIkV2ZW50IFRpbWUgKFQpIiwKICAgICAgICB5bGFiID0gIkZyZXF1ZW5jeSIsCiAgICAgICAgY29sID0gImxpZ2h0Ymx1ZSIpCgpiYXJwbG90KHRhYmxlKGRmJERlbHRhKSwKICAgICAgICBtYWluID0gIkJhciBQbG90IG9mIERlbHRhIiwKICAgICAgICB4bGFiID0gIkRlbHRhIiwKICAgICAgICB5bGFiID0gIkZyZXF1ZW5jeSIsCiAgICAgICAgY29sID0gImxpZ2h0Ymx1ZSIpCgpjb3IoZGYkVCwgZGYkRGVsdGEpCgpmaXQgPC0gTUlDKGRmLCBtZXRob2QgPSAibnAiKQpmaXRfIDwtIE1JQyhkZiwgbWV0aG9kID0gInByZWQuYWRqIikKcHJpbnQoZml0KQpwcmludChmaXRfKQoKZGF0YSA8LSBzaW11bGF0ZV9kYXRhX3BoKDEwMDAwLCBzZWVkID0gMSkKYWdncmVnYXRlKFQgfiByYWNlLCBkYXRhID0gZGF0YSwgbWVhbikKCmBgYAoKCmBgYHtyfQpyZXN1bHQ8LSBydW5fc2ltdWxhdGlvbnMoc2V0dXAgPSAwLCBtID0gMikKcHJpbnQocmVzdWx0KQoKI3NhdmUocmVzdWx0LCBmaWxlID0gInNpbXVsYXRpb25fcmVzdWx0cy9SRGF0YS9BcHJpbF8zXzIwMjVfc2ltdWxhdGlvbi5SRGF0YSIpCgpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIAoKYGBge3J9CgpgYGAKCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDbWQrT3B0aW9uK0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDbWQrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4gCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCgpgYGB7cn0KCmBgYAo=</div>
 
 
 
@@ -1826,7 +1816,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("simulation_report.Rmd");
+  window.initializeSourceEmbed("np_adversarial_exp.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
