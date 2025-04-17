@@ -34,7 +34,7 @@ simulate_data_ph <- function(n, seed = NULL, setup = 0, cov = NULL) {
   
   switch(as.character(setup),
          "0" = { 
-           betas <- c(intercept = 1, race_1 = -3, race_2 = 3, sex_1 = 0.2, cont = 0.01)
+           betas <- c(intercept = 1, race_1 = -3, race_2 = 1, sex_1 = 0.2, cont = 0.01)
          },
          stop("Invalid setup value")
   )

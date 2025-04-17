@@ -61,11 +61,11 @@ generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np",
 }
 
 #setup is fixed 
-run_simulations <- function(setup, cov = NULL, m = 200) {
+run_simulations <- function(setup, cov = NULL, m = 200, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "pred", "pred.adj")) {
   # Define the sample sizes and simulation model choices
   n_values <- c(100, 500, 1000)
-  sim_models <- c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real")
-  models <- c("np", "ph", "po", "pred", "pred.adj")
+  sim_models <- sim_models
+  models <- models
   
   # Container to store results for each combination
   results_list <- list()

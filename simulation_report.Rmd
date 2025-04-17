@@ -17,8 +17,8 @@ source("simulation_functions/generic_simulation.R")
 #Data visualization 
 ```{r}
 
-df <- transform_df(simulate_data_po(n = 10000), score_max = 11)
-df <- df %>% filter(race == 2)
+df <- transform_df(simulate_data_ph(n = 10000), score_max = 11)
+df <- df %>% filter(race == 1)
 
 mean(df$T)
 
@@ -53,5 +53,7 @@ print(result)
 
 #save(result, file = "simulation_results/RData/April_11_2025_simulation.RData")
 
-```
+p_result<- run_simulations(setup = 0, m = 200, sim_models = c("simulate_data_ph"))
+print(p_result)
 
+```

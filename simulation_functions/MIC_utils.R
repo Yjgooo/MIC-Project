@@ -120,39 +120,28 @@ transform_df <- function(df, score_max){
 }
 
 pmf <- function(model, cov = NULL, max_time) {
-  
-  model <- getSCurves(model, cov)  
-  
-  # Extract Turnbull intervals
+  # Get survival curves and intervals from the model
+  model <- getSCurves(model, cov)
   Tbull_ints <- model$Tbull_ints
-  
-  # Extract survival curve estimates
   S_curve <- model$S_curves[[1]]
-  k <- length(S_curve)
   
-  # Compute probability masses from the survival drops
-  p <- numeric(k)
-  p[1] <- 1 - S_curve[1]
-  if (k > 1) {
-    p[2:k] <- S_curve[1:(k - 1)] - S_curve[2:k]
-  }
+  # Compute the probability masses:
+  # p[1] is the probability of an event before the first time point,
+  # then subsequent masses are the drops in the survival curve.
+  p <- c(1 - S_curve[1], -diff(S_curve))
   
-  # Initialize a fixed-length PMF
-  pmf_fixed <- numeric(max_time)
+  # Initialize the PMF vector for times 1:max_time
+  pmf_fixed <- rep(0, max_time)
   
-  # Observed event times (excluding first element)
-  observed_times <- Tbull_ints[, 2][-1]
+  # Extract the right endpoints of the intervals (excluding the first)
+  obs_times <- Tbull_ints[-1, 2]
   
-  # Assign observed probabilities to correct indices
-  for (i in seq_along(observed_times)) {
-    time_point <- observed_times[i]
-    if (time_point <= max_time && time_point >= 1) {
-      pmf_fixed[time_point] <- p[i + 1] # +1 due to removal of first element earlier
-    }
-  }
+  # Only assign probabilities for those time points within 1 and max_time
+  valid <- obs_times >= 1 & obs_times <= max_time
+  pmf_fixed[obs_times[valid]] <- p[-1]
   
-  result <- list("x" = 1:max_time, "y" = pmf_fixed)
-  return(result)
+  # Return the result as a list with x-values and y-values
+  list(x = 1:max_time, y = pmf_fixed)
 }
 
 
