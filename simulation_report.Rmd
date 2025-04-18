@@ -48,12 +48,12 @@ aggregate(T ~ race, data = data, mean)
 
 
 ```{r}
-result<- run_simulations(setup = 0, m = 200)
-print(result)
+#result<- run_simulations(setup = 0, m = 200)
+#print(result)
 
 #save(result, file = "simulation_results/RData/April_11_2025_simulation.RData")
 
-p_result<- run_simulations(setup = 0, m = 200, sim_models = c("simulate_data_ph"))
+p_result<- run_simulations(setup = 0, m = 10, sim_models = c("simulate_data_ph"))
 print(p_result)
 
 ```
