@@ -45,15 +45,15 @@ data <- simulate_data_ph(10000, seed = 1)
 aggregate(T ~ race, data = data, mean)
 
 ```
-
+#ha
 
 ```{r}
-#result<- run_simulations(setup = 0, m = 200)
-#print(result)
+result<- run_simulations(setup = 0, m = 100)
+print(result)
 
-#save(result, file = "simulation_results/RData/April_11_2025_simulation.RData")
+save(result, file = "simulation_results/RData/April_18_2025_simulation.RData")
 
-p_result<- run_simulations(setup = 0, m = 10, sim_models = c("simulate_data_ph"))
-print(p_result)
+#p_result<- run_simulations(setup = 0, m = 10, sim_models = c("simulate_data_ph"))
+#print(p_result)
 
 ```
