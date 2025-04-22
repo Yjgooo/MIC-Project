@@ -1,102 +1,110 @@
 
-simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) { #cov = NULL is for facilitating generic simulation
+simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
+  if (!is.null(seed)) set.seed(seed)
   
-  k <- 10 #so score goes from 1 to 5
+  k <- 10
+  delta_vals <- 1:k
+  T_vals     <- 1:k
   
-  # Define possible values for Delta and T
-  delta_vals <- -k:k   # Delta takes values from -4 to 4 (9 categories)
-  T_vals     <- 1:k    # T takes values from 1 to 5 (5 categories)
+  # simulate covariates
+  sex  <- sample(0:1, n, replace = TRUE)
+  race <- sample(0:2, n, replace = TRUE)
+  age  <- rnorm(n, mean = 80, sd = 5)
   
-  # Pre-allocate vectors for Delta and T.
-  max_score <- numeric(1)
-  Delta <- numeric(n)
-  T <- numeric(n)
-  trueT <- numeric(1)
+  # draw Delta and T
+  Delta <- integer(n)
+  T     <- integer(n)
   
-  #Covariates generation 
-  sex <- sample(0:1, n, replace = TRUE, prob = rep(1/2, 2))
-  race <- sample(0:2, n, replace = TRUE, prob = rep(1/3, 3))
-  age <- rnorm(n, mean = 80, sd = 5)
-  
-  #Sample Delta and T conditionally on the covariates
-  # Sample Delta and T conditionally on the covariates using switch
   switch(as.character(setup),
-         "0" = { #Uniform T and delta 
-           
-           for (i in 1:n) {
-             weights_delta <- rep(1/(2*k + 1), 2*k + 1)
-             Delta[i] <- sample(delta_vals, 1, prob = weights_delta)
-             weights_T <- rep(1/k, k)
-             T[i] <- sample(T_vals, 1, prob = weights_T)
+         "0" = {
+           for (i in seq_len(n)) {
+             Delta[i] <- sample(delta_vals, 1, prob = rep(1/k, k))
+             T[i]     <- sample(T_vals, 1,     prob = rep(1/k, k))
            }
          },
-         "1" = { #(X,D,T) mutually independent; allow for specification of marginal distribution of T and D 
-           
-           T_probs <- exp(c(2, 1, 0, 0))
-           T_probs <- T_probs / sum(T_probs)
-           
-           eta_ <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
-           D_probs <- exp(eta_) / sum(exp(eta_))
-           
-           T <- sample(T_vals, size = n, prob = T_probs, replace = TRUE)
-           Delta <- sample(delta_vals, n, prob = D_probs, replace = TRUE)
-           
+         "1" = {
+           T_probs <- exp(c(2,1,0,0)); T_probs <- T_probs/sum(T_probs)
+           Delta_probs <- exp(c(0,0.1,0.2,0.5,3,2,1,0.5,0.1))
+           Delta_probs <- Delta_probs/sum(Delta_probs)
+           T     <- sample(T_vals, n, prob = rep_len(T_probs, k),     replace = TRUE)
+           Delta <- sample(delta_vals, n, prob = Delta_probs,         replace = TRUE)
          },
-         "2" = { #T and D are not independent; T is inversely related to D; violation of the independence assumption 
-           
-           d_vec <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
-           D_probs <- exp(d_vec) / sum(exp(d_vec))
-           Delta <- sample(delta_vals, n, prob = D_probs, replace = TRUE)
-           
-           T <- pmin(4 - Delta + 1, 4) #max_score = 4
+         "2" = {
+           Delta_probs <- exp(c(0,0.1,0.2,0.5,3,2,1,0.5,0.1))
+           Delta_probs <- Delta_probs/sum(Delta_probs)
+           Delta <- sample(delta_vals, n, prob = Delta_probs, replace = TRUE)
+           T     <- pmin(4 - Delta + 1, 4)
          },
-         
-         "3" = { 
-           
-           eta_ <- c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1)
-           
-           vec1 <- c(2, 1, 0, 0)
-           vec2 <- c(0, 1, 2, 0)
-           vec3 <- c(0, 3, 1, 0)
-           
+         "3" = {
+           eta_ <- c(0,0.1,0.2,0.5,3,2,1,0.5,0.1)
+           vec1  <- c(2,1,0,0); vec2 <- c(0,1,2,0); vec3 <- c(0,3,1,0)
            mat_race <- cbind(vec1, vec2, vec3)
-           
-           vec1_ <- c(0.3, 1, -0.3, -0.1)
-           vec2_ <- c(0, 0, 1, 0.3)
-           
+           vec1_ <- c(0.3,1,-0.3,-0.1); vec2_ <- c(0,0,1,0.3)
            mat_sex <- cbind(vec1_, vec2_)
-           
-           for (i in 1:n) {
-             T_probs <- exp(mat_race[, race[i] + 1] + mat_sex[, sex[i] + 1])
-             T_probs <- T_probs / sum(T_probs)
-             
-             D_probs <- exp(eta_)
-             D_probs <- D_probs / sum(D_probs)
-             
-             T[i] <- sample(T_vals, size = 1, prob = T_probs)
-             Delta[i] <- sample(delta_vals, 1, prob = D_probs)
+           for (i in seq_len(n)) {
+             Tp  <- exp(mat_race[, race[i] + 1] + mat_sex[, sex[i] + 1])
+             Tp  <- Tp / sum(Tp)
+             T[i] <- sample(T_vals, 1, prob = rep_len(Tp, k))
+             Dp  <- exp(eta_); Dp <- Dp / sum(Dp)
+             Delta[i] <- sample(delta_vals, 1, prob = Dp)
            }
-           
          },
-         
-         stop("Invalid setup value")
+         stop("Invalid setup")
   )
   
-  #Compute the indicator variable (feeling significantly better)
-  Indicator <- as.integer(Delta >= T) #indicator whether patient feel significantly improved 
+  Indicator <- as.integer(Delta >= T)
   
-  #Combine into a data frame
-  # 'race' remains as a numeric variable.
   df <- data.frame(
-    Delta = Delta,
-    T = T,
+    Delta     = Delta,
+    T         = T,
     Indicator = Indicator,
-    race = race,
-    sex = sex,
-    cont = age
+    race      = race,
+    sex       = sex,
+    cont      = age
   )
-  return(df)
+  
+  cond_pmf <- function(race, sex, cont) {
+    if (!race %in% 0:2) stop("race must be 0,1,2")
+    if (!sex  %in% 0:1) stop("sex must be 0,1")
+    switch(as.character(setup),
+           "0" = {
+             pmf <- rep(1/k, k)
+           },
+           "1" = {
+             Tp <- exp(c(2,1,0,0)); Tp <- Tp/sum(Tp)
+             pmf <- rep_len(Tp, k)
+           },
+           "2" = {
+             Dp <- exp(c(0,0.1,0.2,0.5,3,2,1,0.5,0.1))
+             Dp <- Dp/sum(Dp)
+             t_for_d <- pmin(4 - delta_vals + 1, 4)
+             pmf <- vapply(T_vals, function(t) sum(Dp[t_for_d == t]), numeric(1))
+           },
+           "3" = {
+             vec1  <- c(2,1,0,0); vec2 <- c(0,1,2,0); vec3 <- c(0,3,1,0)
+             mat_race <- cbind(vec1, vec2, vec3)
+             vec1_ <- c(0.3,1,-0.3,-0.1); vec2_ <- c(0,0,1,0.3)
+             mat_sex <- cbind(vec1_, vec2_)
+             Tp <- exp(mat_race[, race + 1] + mat_sex[, sex + 1])
+             pmf <- rep_len(Tp / sum(Tp), k)
+           }
+    )
+    names(pmf) <- paste0("t=", T_vals)
+    pmf
+  }
+  
+  mean_time <- function(race, sex, cont) {
+    pmf <- cond_pmf(race, sex, cont)
+    sum(T_vals * pmf)
+  }
+  
+  list(
+    dataframe = df,
+    cond_pmf   = cond_pmf,
+    mean_time  = mean_time
+  )
 }
+
 
 
 np_sim <- function(n,m, setup, cov = NULL){ #cov = NULL is a just a placeholder to faciliate generic simulation; never used in the function

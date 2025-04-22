@@ -17,12 +17,16 @@ source("simulation_functions/generic_simulation.R")
 #Data visualization 
 ```{r}
 
-df <- transform_df(simulate_data_ph(n = 10000), score_max = 11)
-df <- df %>% filter(race == 1)
+df <- transform_df(simulate_data_real(n = 100)$dataframe, score_max = 11)
+mean(df$T)
+
+df_ <- df %>% filter(race == 0, sex == 1)
+
+nrow(df %>% filter(Indicator == 1)) / nrow(df)
 
 mean(df$T)
 
-barplot(table(df$T),
+barplot(table(df_$T),
         main = "Bar Plot of Discrete Event Times",
         xlab = "Event Time (T)",
         ylab = "Frequency",
@@ -36,24 +40,32 @@ barplot(table(df$Delta),
 
 cor(df$T, df$Delta)
 
-fit <- MIC(df, method = "np")
-fit_ <- MIC(df, method = "pred.adj")
-print(fit)
-print(fit_)
+fit <- MIC(df, method = "pred.adj")
+fit_ <- MIC(df, user_formula = "cont + factor(sex) + factor(race)", method = "po")
+fit$meanT
+fit_$meanT
 
-data <- simulate_data_ph(10000, seed = 1)
-aggregate(T ~ race, data = data, mean)
+
+plot(1:10, pmf(fit_$model, cov= list(race = 0, sex = 0, cont = 80), max_time = 10)$y)
+#print(fit)
+#print(fit_)
+
+df
 
 ```
-#ha
+```{r}
+res <- simulate_data_po(n = 400)
+cond_pmf <- res$cond_pmf
+cond_pmf(0, 0, 0)
+
+```
 
 ```{r}
-result<- run_simulations(setup = 0, m = 100)
-print(result)
+#result<- run_simulations(setup = 0, m = 2)
+#print(result)
+#save(result, file = "simulation_results/RData/April_18_2025_simulation.RData")
 
-save(result, file = "simulation_results/RData/April_18_2025_simulation.RData")
-
-#p_result<- run_simulations(setup = 0, m = 10, sim_models = c("simulate_data_ph"))
-#print(p_result)
+p_result <- run_simulations(setup = 0, m = 100, sim_model = c("simulate_data_real"), model = c("po"))
+print(p_result)
 
 ```

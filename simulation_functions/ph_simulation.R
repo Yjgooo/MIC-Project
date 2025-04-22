@@ -2,247 +2,232 @@ library(fastDummies)
 library(simsurv)
 
 simulate_data_ph <- function(n, seed = NULL, setup = 0, cov = NULL) {
+  #— 0. Set seed if provided
   if (!is.null(seed)) set.seed(seed)
   
-  # Generate covariates
-  race <- factor(sample(0:2, size = n, replace = TRUE, prob = c(0.4, 0.2, 0.4)), levels = c(0, 1, 2))
-  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
-  cont <- rnorm(n, mean = 80, sd = sqrt(5))
-  
-  # Create raw covariate dataframe
-  cov_data <- data.frame(
-    id = 1:n,
-    race = race,
-    sex = sex,
-    cont = cont
+  #— 1. Simulate covariates
+  race <- factor(
+    sample(0:2, size = n, replace = TRUE, prob = c(0.4, 0.2, 0.4)),
+    levels = c(0, 1, 2)
   )
+  sex  <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
+  cont <- rnorm(n, mean = 80, sd = sqrt(5))
+  cov_data <- data.frame(id = 1:n, race = race, sex = sex, cont = cont)
   
-  # One-hot encode race and sex
+  #— 2. One‑hot encode race and sex (drop first level)
   cov_data_dummy <- fastDummies::dummy_cols(
     cov_data,
-    select_columns = c("race", "sex"),
-    remove_first_dummy = TRUE,
+    select_columns         = c("race", "sex"),
+    remove_first_dummy     = TRUE,
     remove_selected_columns = TRUE
   )
-  
-  # Combine with continuous variable
   cov_data_sim <- cov_data_dummy[, c("id", "race_1", "race_2", "sex_1", "cont")]
-  cov_data_sim$intercept <- 1
   
-  # Strong effect of race for large mean survival difference
-  baseline_hazard <- c(0.01, 0.03, 0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.04)
-  
-  switch(as.character(setup),
-         "0" = { 
-           betas <- c(intercept = 1, race_1 = -0.5, race_2 = 1, sex_1 = 0.2, cont = 0.01)
-           #betas <- c(intercept = 1.2, race_1 = -1.5, race_2 = 0.5, sex_1 = 0.2, cont = 0.01)
-         },
-         stop("Invalid setup value")
+  #— 3. Baseline hazards and regression coefficients
+  baseline_hazard <- c(
+    0.01, 0.03, 0.10, 0.20, 0.30,
+    0.35, 0.40, 0.50, 0.60, 0.04
+  )
+  betas <- switch(as.character(setup),
+                  "0" = c(
+                    race_1 = -0.5,
+                    race_2 =  1.0,
+                    sex_1  =  0.2,
+                    cont   =  0.01
+                  ),
+                  stop("Invalid setup")
   )
   
-  # Override covariate values if given
+  #— 4. Override covariates if user-supplied
   if (!is.null(cov)) {
-    for (name in names(cov)) {
-      if (name %in% names(cov_data_sim)) {
-        cov_data_sim[[name]] <- rep(cov[[name]], n)
+    for (nm in names(cov)) {
+      if (nm %in% names(cov_data_sim)) {
+        cov_data_sim[[nm]] <- rep(cov[[nm]], n)
       } else {
-        stop(paste("Covariate", name, "not found in the data."))
+        stop("Covariate ", nm, " not found.")
       }
     }
   }
   
-  # Linear predictor for PH model
-  linpred <- as.matrix(cov_data_sim[, names(betas)]) %*% betas
+  #— 5. Compute linear predictor
+  lp <- as.numeric(as.matrix(cov_data_sim[, names(betas)]) %*% betas)
   
-  # Sampling function for PH model (truncated to ensure support {1,...,10})
-  sample_discrete_ph <- function(lp, baseline_hazard) {
+  #— 6. Sampler for discrete‐time PH model
+  sample_discrete_ph <- function(lp_i) {
     for (t in seq_along(baseline_hazard)) {
-      hazard_t <- baseline_hazard[t] * exp(lp)
-      hazard_t <- pmin(hazard_t, 1)
-      event <- rbinom(1, 1, hazard_t)
-      if (event == 1) return(t)
+      p_t <- pmin(baseline_hazard[t] * exp(lp_i), 1)
+      if (rbinom(1, 1, p_t) == 1) return(t)
     }
-    return(length(baseline_hazard))  # Truncate to 10 instead of 11
+    length(baseline_hazard)
   }
   
-  # Sample T and Delta independently with the same conditional distribution
-  T_val <- sapply(linpred, sample_discrete_ph, baseline_hazard = baseline_hazard)
-  Delta <- sapply(linpred, sample_discrete_ph, baseline_hazard = baseline_hazard)
+  #— 7. Draw event times T and Delta
+  T_val  <- sapply(lp, sample_discrete_ph)
+  Delta  <- sapply(lp, sample_discrete_ph)
   
-  # Final output
-  final_data <- merge(cov_data, cov_data_sim[, !(names(cov_data_sim) %in% c("cont"))], by = "id")
-  final_data$T <- T_val
-  final_data$Delta <- Delta
-  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
+  #— 8. Build final data frame
+  final_data <- merge(
+    cov_data,
+    cov_data_sim[, setdiff(names(cov_data_sim), "cont")],
+    by = "id"
+  )
+  final_data$T         <- T_val
+  final_data$Delta     <- Delta
+  final_data$Indicator <- as.integer(Delta >= T_val)
   
-  return(final_data)
+  #— 9. Corrected conditional PMF: P(T = t | X)
+  cond_pmf <- function(race, sex, cont) {
+    # coerce factors to integers
+    race <- as.integer(as.character(race))
+    sex  <- as.integer(as.character(sex))
+    if (!race %in% 0:2) stop("race must be 0,1,2")
+    if (!sex  %in% 0:1) stop("sex must be 0,1")
+    
+    # rebuild linear predictor
+    lp_i <- betas["race_1"] * as.numeric(race == 1) +
+      betas["race_2"] * as.numeric(race == 2) +
+      betas["sex_1"]  * as.numeric(sex  == 1) +
+      betas["cont"]   * cont
+    
+    # hazards and survival
+    n_t   <- length(baseline_hazard)
+    p_vec <- pmin(baseline_hazard * exp(lp_i), 1)
+    q_vec <- 1 - p_vec
+    
+    # build pmf with all remaining mass at t = n_t
+    pmf    <- numeric(n_t)
+    S_prev <- 1
+    for (t in seq_len(n_t - 1)) {
+      pmf[t]  <- S_prev * p_vec[t]
+      S_prev  <- S_prev * q_vec[t]
+    }
+    pmf[n_t] <- S_prev           # collapse tail mass here
+    
+    names(pmf) <- paste0("t=", seq_len(n_t))
+    pmf
+  }
+  
+  #— 10. Mean event time from the PMF
+  mean_time <- function(race, sex, cont) {
+    pmf <- cond_pmf(race, sex, cont)
+    sum(seq_along(pmf) * pmf)
+  }
+  
+  #— 11. Return
+  list(
+    dataframe = final_data,
+    cond_pmf  = cond_pmf,
+    mean_time = mean_time
+  )
 }
 
 
-
-#Tried to make the correlation between T and Delta strong
-simulate_data_ph_1 <- function(n, seed = NULL, setup = 0, cov = NULL) {
+simulate_data_ph_wrong_cond_pm <- function(n, seed = NULL, setup = 0, cov = NULL) {
   if (!is.null(seed)) set.seed(seed)
   
-  # Generate covariates
-  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
-  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
-  cont <- rnorm(n, mean = 80, sd = sqrt(5))
-  
-  # Create a data frame with the raw covariates and an identifier
-  cov_data <- data.frame(
-    id = 1:n,
-    race = race,
-    sex = sex,
-    cont = cont
+  # simulate covariates
+  race <- factor(
+    sample(0:2, size = n, replace = TRUE, prob = c(0.4, 0.2, 0.4)),
+    levels = c(0, 1, 2)
   )
+  sex  <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
+  cont <- rnorm(n, mean = 80, sd = sqrt(5))
+  cov_data <- data.frame(id = 1:n, race = race, sex = sex, cont = cont)
   
-  # One-hot encode the categorical variables using fastDummies
+  # one‑hot encode
   cov_data_dummy <- fastDummies::dummy_cols(
     cov_data,
-    select_columns = c("race", "sex"),
-    remove_first_dummy = TRUE,
+    select_columns         = c("race", "sex"),
+    remove_first_dummy     = TRUE,
     remove_selected_columns = TRUE
   )
-  
-  # Combine the one-hot encoded variables with id and continuous variable
   cov_data_sim <- cov_data_dummy[, c("id", "race_1", "race_2", "sex_1", "cont")]
   
-  # Specify the baseline hazard for the event time T (times 1 to 10)
-  baseline_hazard <- c(0.01, 0.03, 0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.04)
+  # baseline hazards and betas (no intercept)
+  baseline_hazard <- c(0.01, 0.03, 0.10, 0.20,
+                       0.30, 0.35, 0.40, 0.50,
+                       0.60, 0.04)
   
-  # Set coefficients for the linear predictors for T and for Delta
-  switch(as.character(setup),
-         "0" = { 
-           betas <- c(race_1 = 0.5, race_2 = -0.3, sex_1 = 0.2, cont = 0.01)
-           gammas <- c(race_1 = 0.3, race_2 = -0.2, sex_1 = 0.1, cont = 0.005)
-         },
-         stop("Invalid setup value")
+  betas <- switch(as.character(setup),
+                  "0" = c(
+                    race_1 = -0.5,
+                    race_2 =  1.0,
+                    sex_1  =  0.2,
+                    cont   =  0.01
+                  ),
+                  stop("Invalid setup")
   )
   
-  # If fixed covariate values are provided, override the generated values
+  # override covariates if requested
   if (!is.null(cov)) {
-    for (name in names(cov)) {
-      if (name %in% names(cov_data_sim)) {
-        cov_data_sim[[name]] <- rep(cov[[name]], n)
+    for (nm in names(cov)) {
+      if (nm %in% names(cov_data_sim)) {
+        cov_data_sim[[nm]] <- rep(cov[[nm]], n)
       } else {
-        stop(paste("Covariate", name, "not found in the data."))
+        stop("Covariate ", nm, " not found.")
       }
     }
   }
   
-  # Compute the linear predictor for T and generate event times using a proportional hazards model
-  linpred <- as.matrix(cov_data_sim[, names(betas)]) %*% betas
+  # linear predictor
+  lp <- as.numeric(as.matrix(cov_data_sim[, names(betas)]) %*% betas)
   
-  # Modified function: use exp(-lp) so that higher lp (and thus higher covariate values)
-  # lead to lower hazards and therefore later (larger) event times T.
-  sample_discrete_ph <- function(lp, baseline_hazard) {
+  # sampling function for PH (truncated support 1:10)
+  sample_discrete_ph <- function(lp_i) {
     for (t in seq_along(baseline_hazard)) {
-      hazard_t <- baseline_hazard[t] * exp(-lp)
-      hazard_t <- pmin(hazard_t, 1)
-      event <- rbinom(1, 1, hazard_t)
-      if (event == 1) return(t)
+      p_t <- pmin(baseline_hazard[t] * exp(lp_i), 1)
+      if (rbinom(1, 1, p_t) == 1) return(t)
     }
-    return(length(baseline_hazard) + 1)
+    length(baseline_hazard)
   }
   
-  event_times <- sapply(linpred, sample_discrete_ph, baseline_hazard)
+  # draw event times
+  T_val <- sapply(lp, sample_discrete_ph)
+  Delta <- sapply(lp, sample_discrete_ph)
   
-  # Generate Delta as a discrete outcome.
-  # Change the support from -10:10 to 0:10 so that Delta is always positive.
-  possible_delta <- 0:10
-  sigma <- 2  # Spread parameter (smaller sigma concentrates probability more strongly at 3)
-  # Baseline log-probabilities: highest at 3 and falling off symmetrically
-  eta_delta <- -((possible_delta - 3)^2) / (2 * sigma^2)
-  
-  # Compute the linear predictor for Delta from the covariates using gammas
-  lp_delta <- as.vector(as.matrix(cov_data_sim[, names(gammas)]) %*% gammas)
-  
-  Delta <- sapply(1:n, function(i) {
-    # Incorporate the covariate effect by shifting the baseline probabilities
-    unnormalized <- exp(eta_delta + possible_delta * lp_delta[i])
-    probs <- unnormalized / sum(unnormalized)
-    sample(possible_delta, size = 1, prob = probs)
-  })
-  
-  # Merge the simulation output with the original covariate data
-  final_data <- merge(cov_data, cov_data_sim[, !(names(cov_data_sim) %in% c("cont"))], by = "id")
-  final_data$T <- pmin(event_times, 10)
-  final_data$Delta <- Delta
-  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
-  
-  return(final_data)
-}
-
-
-simulate_data_ph_old <- function(n, seed = NULL, setup = 0, cov = NULL) {
-  if (!is.null(seed)) set.seed(seed)
-  
-  race <- factor(sample(0:2, size = n, replace = TRUE), levels = c(0, 1, 2))
-  sex <- factor(sample(0:1, size = n, replace = TRUE), levels = c(0, 1))
-  cont <- rnorm(n, mean = 80, sd = sqrt(5))
-  
-  eta <- c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 3, 2.5, 2.5, 2.5, 2, 1, 1, 0.5, 0.5, 0.5, 0.3)
-  D_probs <- exp(eta) / sum(exp(eta))
-  Delta <- sample(-10:10, size = n, replace = TRUE, prob = D_probs)
-  
-  cov_data <- data.frame(
-    id = 1:n,
-    race = race,
-    sex = sex,
-    cont = cont,
-    Delta = Delta
-  )
-  
-  cov_data_dummy <- fastDummies::dummy_cols(
+  # assemble data
+  final_data <- merge(
     cov_data,
-    select_columns = c("race", "sex"),
-    remove_first_dummy = TRUE,
-    remove_selected_columns = TRUE
+    cov_data_sim[, setdiff(names(cov_data_sim), "cont")],
+    by = "id"
   )
+  final_data$T         <- T_val
+  final_data$Delta     <- Delta
+  final_data$Indicator <- as.integer(Delta >= T_val)
   
-  cov_data_sim <- cov_data_dummy[, c("id", "race_1", "race_2", "sex_1", "cont")]
-  
-  # Specify the baseline discrete hazard (hand-specified for times 1 to 10)
-  baseline_hazard <- c(0.01, 0.03, 0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.04) #latter values needs to be larger...
-  
-  switch(as.character(setup),
-         "0" = { 
-           betas <- c(race_1 = 0.5, race_2 = -0.3, sex_1 = 0.2, cont = 0.01)
-         },
-         stop("Invalid setup value")
-  )
-  
-  if(!is.null(cov)){
-    for (name in names(cov)) {
-      if (name %in% names(cov_data_sim)) {
-        cov_data_sim[[name]] <- rep(cov[[name]], n)
-      } else {
-        stop(paste("Covariate", name, "not found in the data."))
-      }
-    }
-  }
-  
-  linpred <- as.matrix(cov_data_sim[, names(betas)]) %*% betas
-  
-  sample_discrete_ph <- function(lp, baseline_hazard) {
+  # conditional PMF: P(T = t | X)
+  cond_pmf <- function(race, sex, cont) {
+    if (!race %in% 0:2) stop("race must be 0,1,2")
+    if (!sex  %in% 0:1) stop("sex must be 0,1")
+    lp_i <- betas["race_1"] * as.numeric(race == 1) +
+      betas["race_2"] * as.numeric(race == 2) +
+      betas["sex_1"]  * as.numeric(sex == 1) +
+      betas["cont"]   * cont
+    p_vec <- pmin(baseline_hazard * exp(lp_i), 1)
+    q_vec <- 1 - p_vec
+    S_prev <- 1
+    pmf <- numeric(length(baseline_hazard))
     for (t in seq_along(baseline_hazard)) {
-      hazard_t <- baseline_hazard[t] * exp(lp)
-      hazard_t <- pmin(hazard_t, 1)
-      event <- rbinom(1, 1, hazard_t)
-      if (event == 1) return(t)
+      pmf[t] <- S_prev * p_vec[t]
+      S_prev <- S_prev * q_vec[t]
     }
-    return(length(baseline_hazard) + 1)
+    names(pmf) <- paste0("t=", seq_along(pmf))
+    pmf
   }
   
-  event_times <- sapply(linpred, sample_discrete_ph, baseline_hazard)
+  # mean event time from the PMF
+  mean_time <- function(race, sex, cont) {
+    pmf <- cond_pmf(race, sex, cont)
+    sum(seq_along(pmf) * pmf)
+  }
   
-  final_data <- merge(cov_data, cov_data_sim[, !(names(cov_data_sim) %in% c("cont"))], by = "id")
-  final_data$T <- pmin(event_times, 10)
-  final_data$Indicator <- as.integer(final_data$Delta >= final_data$T)
-  
-  return(final_data)
+  list(
+    dataframe = final_data,
+    cond_pmf  = cond_pmf,
+    mean_time = mean_time
+  )
 }
+
 
 
 ph_sim <- function(n,m, setup, cov = NULL){ 

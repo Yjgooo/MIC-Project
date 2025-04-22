@@ -1,69 +1,126 @@
-generic_sim <- function(n, m, setup, cov = NULL, sim_model = "simulate_data_np", model = "np") { 
-  # Retrieve the simulation function based on the provided name
+generic_sim <- function(n, m, setup, cov = NULL,
+                        sim_model = "simulate_data_np",
+                        model     = "np",
+                        N0        = 10000,
+                        support   = 1:10) {
+  print("sim_model")
+  print(sim_model)
+  print("model")
+  print(model)
+  
+  # 1. get simulation function
   sim <- get(sim_model)
   
-  # Use a large sample to get the true distribution of T and true mean
-  data_large <- sim(n = 10000, setup = setup, cov = cov)
-  true_mean <- mean(data_large$T)
+  # 2. large sample for "truth"
+  tmp0       <- sim(n = N0, setup = setup, cov = cov)
+  data_large <- tmp0$dataframe
+  cond_pmf   <- tmp0$cond_pmf    # only used if model != "np"
+  cond_mean  <- tmp0$mean_time   # only used if model != "np"
   
-  full_support <- 1:10
-  true_pmf <- prop.table(table(factor(data_large$T, levels = full_support)))
+  X_large <- data_large[, c("Delta","race","sex","cont")]
   
-  vec <- numeric(m)
-  tv_dist_vec <- numeric(m)
-  coverage_vec <- numeric(m)  # Vector to store coverage indicator (0 if CI covers, 1 otherwise)
+  # compute true conditional means & pmfs
+  if(sim_model != "simulate_data_real"){
+    true_mean_vec <- with(X_large,
+                          mapply(cond_mean, race, sex, cont))
+    true_pmf_mat  <- t(mapply(function(r,s,c) cond_pmf(r,s,c),
+                              X_large$race,
+                              X_large$sex,
+                              X_large$cont))
+  }else{ # for real simulation 
+    true_mean_vec <- with(X_large,
+                          mapply(cond_mean, Delta, race, sex, cont))
+    true_pmf_mat  <- t(mapply(function(d,r,s,c) cond_pmf(d,r,s,c),
+                              X_large$Delta,
+                              X_large$race,
+                              X_large$sex,
+                              X_large$cont))
+  }
+
   
-  # Models on restricted data
-  for(i in 1:m) {
-    # Note: cov parameter is not passed here to mimic the original function.
-    data_oracle <- sim(n = n, setup = setup)
-    data_observed <- subset(data_oracle, select = -T)  # dataframe without T
-    df_ <- transform_df(data_observed, score_max = 11)
+  # true marginal pmf
+  true_marg_pmf <- colMeans(true_pmf_mat)
+  
+  # storage
+  se_vec      <- numeric(m)
+  ise_vec     <- numeric(m)
+  itv_vec     <- numeric(m)
+  tv_marg_vec <- numeric(m)
+  
+
+  
+  # 3. Monte Carlo replicates
+  for(i in seq_len(m)) {
+    # simulate smaller dataset & fit
+    tmp    <- sim(n = n, setup = setup)
+    df0    <- transform_df(tmp$dataframe, 11) 
     
-    # For new methods, do not pass user_formula
-    if(model %in% c("roc", "pred", "pred.adj")){
-      fit <- MIC(df_, method = model, cov = cov)
-    } else {
-      fit <- MIC(df_, user_formula = "cont + factor(sex) + factor(race)", method = model, cov = cov)
+    fit <- MIC(subset(df0, select = -T),
+          user_formula = "cont + factor(sex) + factor(race)",
+          method       = model,
+          cov          = cov)
+    
+    # build estimated conditional pmf & mean on the large grid
+    est_pmf_mat <- matrix(0, nrow = N0, ncol = length(support))
+    est_mean_vec <- numeric(N0)
+    
+    for(j in seq_len(N0)) {
+      if(model %in% c("roc", "pred", "pred.adj")){
+        est_mean_vec[j] <- fit$meanT
+      }else{
+        pmfj <- pmf(fit$model,
+                    cov      = list(race = X_large$race[j],
+                                    sex   = X_large$sex[j],
+                                    cont  = X_large$cont[j]),
+                    max_time = 10)$y
+        est_pmf_mat[j, ] <- pmfj
+        est_mean_vec[j]  <- sum(support * pmfj)
+      }
     }
     
-    vec[i] <- abs(fit$meanT - true_mean)
+    # SE 
+    se_vec[i] <- (mean(true_mean_vec) - mean(est_mean_vec))**2 
     
-    # For new methods, density estimates are not provided so TV distance is NA.
-    if(model %in% c("roc", "pred", "pred.adj")){
-      tv_dist_vec[i] <- NA
-    } else {
-      tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit$model, cov, max_time = 10)$y)
-    }
-    
-    # Compute coverage indicator if CI is available.
-    # Here, we assume that fit$CI is a two-element vector (lower and upper bounds).
-    if(!is.null(fit$CI) && !any(is.na(fit$CI))) {
-      coverage_vec[i] <- ifelse(true_mean >= fit$CI[1] && true_mean <= fit$CI[2], 0, 1)
-    } else {
-      coverage_vec[i] <- NA
+    if(!(model %in% c("roc", "pred", "pred.adj"))){
+      # ISE
+      ise_vec[i] <- mean((true_mean_vec - est_mean_vec)^2)
+      
+      # ITV
+      tv_cond    <- rowSums(abs(true_pmf_mat - est_pmf_mat)) / 2
+      itv_vec[i] <- mean(tv_cond)
+      
+      # marginal TV
+      est_marg_pmf   <- colMeans(est_pmf_mat)
+      tv_marg_vec[i] <- sum(abs(est_marg_pmf - true_marg_pmf)) / 2
     }
   }
   
-  result <- list(
-    model = model, 
-    dif = vec,
-    tv_dist = tv_dist_vec,  # For new methods this will be NA
-    coverage = coverage_vec, # Coverage indicator for each replication
-    true_mean = true_mean,   # Store the true mean for reference
-    n = n,
-    m = m,
-    setup = setup
-  )
+  if(model %in% c("roc", "pred", "pred.adj")){
+    ise_vec <- NA
+    itv_vec <- NA
+    tv_marg_vec <- NA 
+  }
   
-  class(result) <- "mega"
-  return(result)
+  out <- list(
+    model         = model,
+    se            = se_vec, 
+    ise           = ise_vec,      # ∫(E[T|X]-ĤE[T|X])² p(X)dX
+    itv           = itv_vec,      # ∫TV(P(T|X),ĤP(T|X)) p(X)dX
+    tv_marg       = tv_marg_vec,  # TV(E[ĤP(T|X)],P(T))
+    true_marg_pmf = true_marg_pmf,
+    n             = n,
+    m             = m,
+    setup         = setup
+  )
+  class(out) <- "mega"
+  return(out)
 }
 
+
 #setup is fixed 
-run_simulations <- function(setup, cov = NULL, m = 200, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "pred", "pred.adj")) {
+run_simulations <- function(setup, cov = NULL, m = 100, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "roc", "pred", "pred.adj")) {
   # Define the sample sizes and simulation model choices
-  n_values <- c(100, 500, 1000)
+  n_values <- c(100)
   sim_models <- sim_models
   models <- models
   
@@ -92,6 +149,39 @@ run_simulations <- function(setup, cov = NULL, m = 200, sim_models = c("simulate
 }
 
 print.mega <- function(x) {
+  cat(x$model, "Simulation Results\n")
+  cat("------------------------\n")
+  cat("Parameters: n =", x$n, ", m =", x$m, ", setup =", x$setup, "\n\n")
+  
+  # 1) Marginal mean squared error
+  cat("MSE (marginal mean):", mean(x$se, na.rm = TRUE), "\n\n")
+  
+  # 2) Integrated squared error (conditional mean)
+  if (all(is.na(x$ise))) {
+    cat("ISE (conditional mean): Not available\n\n")
+  } else {
+    cat("ISE (conditional mean):", mean(x$ise, na.rm = TRUE), "\n\n")
+  }
+  
+  # 3) Integrated TV distance (conditional)
+  if (all(is.na(x$itv))) {
+    cat("ITV (conditional TV): Not available\n\n")
+  } else {
+    cat("ITV (conditional TV):", mean(x$itv, na.rm = TRUE), "\n\n")
+  }
+  
+  # 4) Marginal TV distance
+  if (all(is.na(x$tv_marg))) {
+    cat("Marginal TV distance: Not available\n")
+  } else {
+    cat("Marginal TV distance:", mean(x$tv_marg, na.rm = TRUE), "\n")
+  }
+  
+  invisible(x)
+}
+
+
+print_outdated.mega <- function(x) {
   cat(x$model, "Simulation Results\n")
   cat("------------------------\n")
   cat("Parameters: n =", x$n, ", m =", x$m, ", setup =", x$setup, "\n\n")
