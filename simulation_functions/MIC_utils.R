@@ -52,7 +52,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
   if(method %in% c("roc", "pred", "pred.adj")){
     meanT <- model$threshold
   } else {
-    if(is.null(cov)){
+    if(is.null(cov)){ # average the mean over the entire dataset
       n <- nrow(df)
       v <- numeric(n)
       cov_vec <- extract_covs(user_formula)

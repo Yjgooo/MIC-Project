@@ -49,6 +49,7 @@ simulate_data_real <- function(
   }
   
   # 1) Generate covariates
+  print(n)
   sex  <- sample(0:1, n, TRUE)
   race <- sample(0:2, n, TRUE)
   cont <- rnorm(n, 65, 10)

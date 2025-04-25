@@ -1,8 +1,10 @@
+
 generic_sim <- function(n, m, setup, cov = NULL,
                         sim_model = "simulate_data_np",
                         model     = "np",
                         N0        = 10000,
-                        support   = 1:10) {
+                        support   = 1:10,
+                        boot      = FALSE) {
   print("sim_model")
   print(sim_model)
   print("model")
@@ -16,6 +18,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
   data_large <- tmp0$dataframe
   cond_pmf   <- tmp0$cond_pmf    # only used if model != "np"
   cond_mean  <- tmp0$mean_time   # only used if model != "np"
+  #true_mean <- mean(data_large$T)
   
   X_large <- data_large[, c("Delta","race","sex","cont")]
   
@@ -43,10 +46,11 @@ generic_sim <- function(n, m, setup, cov = NULL,
   
   # storage
   se_vec      <- numeric(m)
+  bias        <- numeric(m)
+  coverage    <- numeric(m)
   ise_vec     <- numeric(m)
   itv_vec     <- numeric(m)
   tv_marg_vec <- numeric(m)
-  
 
   
   # 3. Monte Carlo replicates
@@ -58,7 +62,8 @@ generic_sim <- function(n, m, setup, cov = NULL,
     fit <- MIC(subset(df0, select = -T),
           user_formula = "cont + factor(sex) + factor(race)",
           method       = model,
-          cov          = cov)
+          cov          = cov, 
+          boot         = boot)
     
     # build estimated conditional pmf & mean on the large grid
     est_pmf_mat <- matrix(0, nrow = N0, ncol = length(support))
@@ -78,8 +83,17 @@ generic_sim <- function(n, m, setup, cov = NULL,
       }
     }
     
+    # True mean
+    true_mean <- mean(true_mean_vec)
+    
     # SE 
-    se_vec[i] <- (mean(true_mean_vec) - mean(est_mean_vec))**2 
+    se_vec[i] <- (true_mean - mean(est_mean_vec))**2 
+    
+    # Coverage
+    coverage[i] <- as.numeric(true_mean >= fit$CI[1] & true_mean <= fit$CI[2])
+    
+    # Bias
+    bias[i] <- mean(est_mean_vec) - true_mean 
     
     if(!(model %in% c("roc", "pred", "pred.adj"))){
       # ISE
@@ -104,6 +118,8 @@ generic_sim <- function(n, m, setup, cov = NULL,
   out <- list(
     model         = model,
     se            = se_vec, 
+    bias          = bias,
+    coverage      = coverage, 
     ise           = ise_vec,      # ∫(E[T|X]-ĤE[T|X])² p(X)dX
     itv           = itv_vec,      # ∫TV(P(T|X),ĤP(T|X)) p(X)dX
     tv_marg       = tv_marg_vec,  # TV(E[ĤP(T|X)],P(T))
@@ -118,7 +134,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
 
 
 #setup is fixed 
-run_simulations <- function(setup, cov = NULL, m = 100, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "roc", "pred", "pred.adj")) {
+run_simulations <- function(setup, cov = NULL, m = 100, boot = FALSE, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "roc", "pred", "pred.adj")) {
   # Define the sample sizes and simulation model choices
   n_values <- c(100)
   sim_models <- sim_models
@@ -136,7 +152,7 @@ run_simulations <- function(setup, cov = NULL, m = 100, sim_models = c("simulate
         
         # Call the generic simulation function
         sim_result <- generic_sim(n = n_val, m = m, setup = setup, cov = cov,
-                                  sim_model = sim_model, model = model)
+                                  sim_model = sim_model, model = model, boot = boot)
         
         # Create a key for the result list, e.g. "n_100_po"
         key <- paste("n", n_val, sim_model, "fit_model", model, sep = "_")
@@ -153,24 +169,27 @@ print.mega <- function(x) {
   cat("------------------------\n")
   cat("Parameters: n =", x$n, ", m =", x$m, ", setup =", x$setup, "\n\n")
   
-  # 1) Marginal mean squared error
+  # Marginal mean squared error
   cat("MSE (marginal mean):", mean(x$se, na.rm = TRUE), "\n\n")
   
-  # 2) Integrated squared error (conditional mean)
+  # Coverage
+  cat("Coverage:", mean(x$coverage), "\n\n")
+  
+  # Integrated squared error (conditional mean)
   if (all(is.na(x$ise))) {
     cat("ISE (conditional mean): Not available\n\n")
   } else {
     cat("ISE (conditional mean):", mean(x$ise, na.rm = TRUE), "\n\n")
   }
   
-  # 3) Integrated TV distance (conditional)
+  # Integrated TV distance (conditional)
   if (all(is.na(x$itv))) {
     cat("ITV (conditional TV): Not available\n\n")
   } else {
     cat("ITV (conditional TV):", mean(x$itv, na.rm = TRUE), "\n\n")
   }
   
-  # 4) Marginal TV distance
+  # Marginal TV distance
   if (all(is.na(x$tv_marg))) {
     cat("Marginal TV distance: Not available\n")
   } else {

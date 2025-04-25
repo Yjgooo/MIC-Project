@@ -1,0 +1,24 @@
+#!/bin/bash --login
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1 # number of core 
+#SBATCH --mem=1GB
+#SBATCH --job-name=test
+#SBATCH --time=00:10:00
+#SBATCH --output=./slurmout/%x-%j.SLURMout
+#SBATCH --array=1-4   # Now array is over setting (1 to 4)
+
+module purge
+module load GCC/13.2.0 
+module load R/4.3.3-gfbf-2023b
+
+echo start: $(date +%H:%M:%S)
+
+
+setting=$SLURM_ARRAY_TASK_ID
+
+for (( algorithm=1; algorithm<=6; algorithm++ )); do
+    #echo "Running Setting $setting, Algorithm $algorithm"
+    Rscript test.R $setting $algorithm
+done
+
+echo end: $(date +%H:%M:%S)
