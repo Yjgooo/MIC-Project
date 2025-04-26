@@ -5,6 +5,135 @@ generic_sim <- function(n, m, setup, cov = NULL,
                         N0        = 10000,
                         support   = 1:10,
                         boot      = FALSE) {
+  library(parallel)
+  
+  #print("sim_model")
+  #print(sim_model)
+  #print("model")
+  #print(model)
+  
+  # 1. get simulation function
+  sim <- get(sim_model)
+  
+  # 2. large sample for "truth"
+  tmp0       <- sim(n = N0, setup = setup, cov = cov)
+  data_large <- tmp0$dataframe
+  cond_pmf   <- tmp0$cond_pmf
+  cond_mean  <- tmp0$mean_time
+  
+  X_large <- data_large[, c("Delta","race","sex","cont")]
+  
+  if(sim_model != "simulate_data_real"){
+    true_mean_vec <- with(X_large,
+                          mapply(cond_mean, race, sex, cont))
+    true_pmf_mat  <- t(mapply(function(r,s,c) cond_pmf(r,s,c),
+                              X_large$race,
+                              X_large$sex,
+                              X_large$cont))
+  } else {
+    true_mean_vec <- with(X_large,
+                          mapply(cond_mean, Delta, race, sex, cont))
+    true_pmf_mat  <- t(mapply(function(d,r,s,c) cond_pmf(d,r,s,c),
+                              X_large$Delta,
+                              X_large$race,
+                              X_large$sex,
+                              X_large$cont))
+  }
+  
+  true_marg_pmf <- colMeans(true_pmf_mat)
+  
+  # 3. Monte Carlo replicates (parallel)
+  results_list <- mclapply(seq_len(m), function(i) {
+    tmp    <- sim(n = n, setup = setup)
+    df0    <- transform_df(tmp$dataframe, 11) 
+    
+    fit <- MIC(subset(df0, select = -T),
+               user_formula = "cont + factor(sex) + factor(race)",
+               method       = model,
+               cov          = cov, 
+               boot         = boot)
+    
+    est_pmf_mat <- matrix(0, nrow = N0, ncol = length(support))
+    est_mean_vec <- numeric(N0)
+    
+    for (j in seq_len(N0)) {
+      if (model %in% c("roc", "pred", "pred.adj")) {
+        est_mean_vec[j] <- fit$meanT
+      } else {
+        pmfj <- pmf(fit$model,
+                    cov      = list(race = X_large$race[j],
+                                    sex   = X_large$sex[j],
+                                    cont  = X_large$cont[j]),
+                    max_time = 10)$y
+        est_pmf_mat[j, ] <- pmfj
+        est_mean_vec[j]  <- sum(support * pmfj)
+      }
+    }
+    
+    true_mean <- mean(true_mean_vec)
+    se_val <- (true_mean - mean(est_mean_vec))^2
+    coverage_val <- as.numeric(true_mean >= fit$CI[1] & true_mean <= fit$CI[2])
+    bias_val <- mean(est_mean_vec) - true_mean
+    
+    if (model %in% c("roc", "pred", "pred.adj")) {
+      ise_val <- NA
+      itv_val <- NA
+      tv_marg_val <- NA
+    } else {
+      ise_val <- mean((true_mean_vec - est_mean_vec)^2)
+      tv_cond <- rowSums(abs(true_pmf_mat - est_pmf_mat)) / 2
+      itv_val <- mean(tv_cond)
+      est_marg_pmf <- colMeans(est_pmf_mat)
+      tv_marg_val  <- sum(abs(est_marg_pmf - true_marg_pmf)) / 2
+    }
+    
+    list(se = se_val,
+         coverage = coverage_val,
+         bias = bias_val,
+         ise = ise_val,
+         itv = itv_val,
+         tv_marg = tv_marg_val)
+    
+  }, mc.cores = 20)
+  
+  # Extract results from list
+  se_vec      <- sapply(results_list, `[[`, "se")
+  coverage    <- sapply(results_list, `[[`, "coverage")
+  bias        <- sapply(results_list, `[[`, "bias")
+  ise_vec     <- sapply(results_list, `[[`, "ise")
+  itv_vec     <- sapply(results_list, `[[`, "itv")
+  tv_marg_vec <- sapply(results_list, `[[`, "tv_marg")
+  
+  if (model %in% c("roc", "pred", "pred.adj")) {
+    ise_vec <- NA
+    itv_vec <- NA
+    tv_marg_vec <- NA 
+  }
+  
+  out <- list(
+    model         = model,
+    se            = se_vec, 
+    bias          = bias,
+    coverage      = coverage, 
+    ise           = ise_vec,
+    itv           = itv_vec,
+    tv_marg       = tv_marg_vec,
+    true_marg_pmf = true_marg_pmf,
+    n             = n,
+    m             = m,
+    setup         = setup
+  )
+  class(out) <- "mega"
+  return(out)
+}
+
+
+generic_sim_nonparell <- function(n, m, setup, cov = NULL,
+                        sim_model = "simulate_data_np",
+                        model     = "np",
+                        N0        = 10000,
+                        support   = 1:10,
+                        boot      = FALSE) {
   print("sim_model")
   print(sim_model)
   print("model")

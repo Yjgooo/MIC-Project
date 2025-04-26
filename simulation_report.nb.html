@@ -1868,14 +1868,14 @@ cond_pmf(0, 0, 0)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3Jlc3VsdDwtIHJ1bl9zaW11bGF0aW9ucyhzZXR1cCA9IDAsIG0gPSAyKVxuI3ByaW50KHJlc3VsdClcbiNzYXZlKHJlc3VsdCwgZmlsZSA9IFwic2ltdWxhdGlvbl9yZXN1bHRzL1JEYXRhL0FwcmlsXzE4XzIwMjVfc2ltdWxhdGlvbi5SRGF0YVwiKVxuXG5wX3Jlc3VsdCA8LSBydW5fc2ltdWxhdGlvbnMoc2V0dXAgPSAwLCBtID0gMSwgc2ltX21vZGVsID0gYyhcInNpbXVsYXRlX2RhdGFfbnBcIiwgXCJzaW11bGF0ZV9kYXRhX3BoXCIsIFwic2ltdWxhdGVfZGF0YV9wb1wiLCBcInNpbXVsYXRlX2RhdGFfcmVhbFwiKSwgbW9kZWwgPSBjKFwibnBcIixcInBoXCIsIFwicm9jXCIsIFwicHJlZC5hZGpcIiksIGJvb3QgPSBUUlVFKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3Jlc3VsdDwtIHJ1bl9zaW11bGF0aW9ucyhzZXR1cCA9IDAsIG0gPSAyKVxuI3ByaW50KHJlc3VsdClcbiNzYXZlKHJlc3VsdCwgZmlsZSA9IFwic2ltdWxhdGlvbl9yZXN1bHRzL1JEYXRhL0FwcmlsXzE4XzIwMjVfc2ltdWxhdGlvbi5SRGF0YVwiKVxuXG5wX3Jlc3VsdCA8LSBydW5fc2ltdWxhdGlvbnMoc2V0dXAgPSAwLCBtID0gNSwgc2ltX21vZGVsID0gYyhcInNpbXVsYXRlX2RhdGFfbnBcIiksIG1vZGVsID0gYyhcIm5wXCIsXCJwaFwiLFwicG9cIixcInJvY1wiLFwicHJlZFwiLFwicHJlZC5hZGpcIiksIGJvb3QgPSBUUlVFKVxuYGBgIn0= -->
 <pre class="r"><code>#result&lt;- run_simulations(setup = 0, m = 2)
 #print(result)
 #save(result, file = &quot;simulation_results/RData/April_18_2025_simulation.RData&quot;)
 
-p_result &lt;- run_simulations(setup = 0, m = 1, sim_model = c(&quot;simulate_data_np&quot;, &quot;simulate_data_ph&quot;, &quot;simulate_data_po&quot;, &quot;simulate_data_real&quot;), model = c(&quot;np&quot;,&quot;ph&quot;, &quot;roc&quot;, &quot;pred.adj&quot;), boot = TRUE)</code></pre>
+p_result &lt;- run_simulations(setup = 0, m = 5, sim_model = c(&quot;simulate_data_np&quot;), model = c(&quot;np&quot;,&quot;ph&quot;,&quot;po&quot;,&quot;roc&quot;,&quot;pred&quot;,&quot;pred.adj&quot;), boot = TRUE)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwibnBcIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicGhcIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicm9jXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX25wXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInByZWQuYWRqXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3BoXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcIm5wXCJcbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwibnBcIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicGhcIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicG9cIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicm9jXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX25wXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInByZWRcIlxuWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfbnBcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicHJlZC5hZGpcIlxuIn0= -->
 <pre><code>[1] &quot;sim_model&quot;
 [1] &quot;simulate_data_np&quot;
 [1] &quot;model&quot;
@@ -1887,132 +1887,92 @@ p_result &lt;- run_simulations(setup = 0, m = 1, sim_model = c(&quot;simulate_da
 [1] &quot;sim_model&quot;
 [1] &quot;simulate_data_np&quot;
 [1] &quot;model&quot;
+[1] &quot;po&quot;
+[1] &quot;sim_model&quot;
+[1] &quot;simulate_data_np&quot;
+[1] &quot;model&quot;
 [1] &quot;roc&quot;
 [1] &quot;sim_model&quot;
 [1] &quot;simulate_data_np&quot;
 [1] &quot;model&quot;
-[1] &quot;pred.adj&quot;
+[1] &quot;pred&quot;
 [1] &quot;sim_model&quot;
-[1] &quot;simulate_data_ph&quot;
+[1] &quot;simulate_data_np&quot;
 [1] &quot;model&quot;
-[1] &quot;np&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2Qgb3ZlcndyaXR0ZW4gYnkgJ2RhdGEudGFibGUnOlxuICBtZXRob2QgICAgICAgICAgIGZyb21cbiAgcHJpbnQuZGF0YS50YWJsZSAgICAgXG4ifQ== -->
-<pre><code>Registered S3 method overwritten by &#39;data.table&#39;:
-  method           from
-  print.data.table     </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfcGhcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicGhcIlxuIn0= -->
-<pre><code>[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_ph&quot;
-[1] &quot;model&quot;
-[1] &quot;ph&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuXG4ifQ== -->
-<pre><code>Warning: Maximum iterations reached in ic_sp.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfcGhcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicm9jXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3BoXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInByZWQuYWRqXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3BvXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcIm5wXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3BvXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInBoXCJcbiJ9 -->
-<pre><code>[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_ph&quot;
-[1] &quot;model&quot;
-[1] &quot;roc&quot;
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_ph&quot;
-[1] &quot;model&quot;
-[1] &quot;pred.adj&quot;
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_po&quot;
-[1] &quot;model&quot;
-[1] &quot;np&quot;
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_po&quot;
-[1] &quot;model&quot;
-[1] &quot;ph&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuXG4ifQ== -->
-<pre><code>Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfcG9cIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwicm9jXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3BvXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInByZWQuYWRqXCJcblsxXSBcInNpbV9tb2RlbFwiXG5bMV0gXCJzaW11bGF0ZV9kYXRhX3JlYWxcIlxuWzFdIFwibW9kZWxcIlxuWzFdIFwibnBcIlxuWzFdIDEwMDAwXG5bMV0gMTAwXG5bMV0gXCJzaW1fbW9kZWxcIlxuWzFdIFwic2ltdWxhdGVfZGF0YV9yZWFsXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInBoXCJcblsxXSAxMDAwMFxuWzFdIDEwMFxuIn0= -->
-<pre><code>[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_po&quot;
-[1] &quot;model&quot;
-[1] &quot;roc&quot;
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_po&quot;
-[1] &quot;model&quot;
-[1] &quot;pred.adj&quot;
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_real&quot;
-[1] &quot;model&quot;
-[1] &quot;np&quot;
-[1] 10000
-[1] 100
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_real&quot;
-[1] &quot;model&quot;
-[1] &quot;ph&quot;
-[1] 10000
-[1] 100</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuV2FybmluZzogTWF4aW11bSBpdGVyYXRpb25zIHJlYWNoZWQgaW4gaWNfc3AuXG4ifQ== -->
-<pre><code>Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.Warning: Maximum iterations reached in ic_sp.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwic2ltX21vZGVsXCJcblsxXSBcInNpbXVsYXRlX2RhdGFfcmVhbFwiXG5bMV0gXCJtb2RlbFwiXG5bMV0gXCJyb2NcIlxuWzFdIDEwMDAwXG5bMV0gMTAwXG5bMV0gXCJzaW1fbW9kZWxcIlxuWzFdIFwic2ltdWxhdGVfZGF0YV9yZWFsXCJcblsxXSBcIm1vZGVsXCJcblsxXSBcInByZWQuYWRqXCJcblsxXSAxMDAwMFxuWzFdIDEwMFxuIn0= -->
-<pre><code>[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_real&quot;
-[1] &quot;model&quot;
-[1] &quot;roc&quot;
-[1] 10000
-[1] 100
-[1] &quot;sim_model&quot;
-[1] &quot;simulate_data_real&quot;
-[1] &quot;model&quot;
-[1] &quot;pred.adj&quot;
-[1] 10000
-[1] 100</code></pre>
+[1] &quot;pred.adj&quot;</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQocF9yZXN1bHQpXG5gYGAifQ== -->
 <pre class="r"><code>print(p_result)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX25wXG5ucCBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjAyMTc3NDcyIFxuXG5Db3ZlcmFnZTogMSBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogMC4wMjE3NzQ3MiBcblxuSVRWIChjb25kaXRpb25hbCBUVik6IDAuNTU2NTIxNyBcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IDAuNTU2NTIxNyBcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX3BoXG5waCBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjAzODQyMjM0IFxuXG5Db3ZlcmFnZTogMSBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogMC41MDk2NjM4IFxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogMC41MTgxNjcxIFxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogMC40OTAwNTkyIFxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9ucF9maXRfbW9kZWxfcm9jXG5yb2MgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMi4yNSBcblxuQ292ZXJhZ2U6IDEgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IE5vdCBhdmFpbGFibGVcblxuSVRWIChjb25kaXRpb25hbCBUVik6IE5vdCBhdmFpbGFibGVcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IE5vdCBhdmFpbGFibGVcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX3ByZWQuYWRqXG5wcmVkLmFkaiBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjAzMTcwNTEgXG5cbkNvdmVyYWdlOiAxIFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiBOb3QgYXZhaWxhYmxlXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiBOb3QgYXZhaWxhYmxlXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiBOb3QgYXZhaWxhYmxlXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3BoX2ZpdF9tb2RlbF9ucFxubnAgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMC4zNDkzMjcyIFxuXG5Db3ZlcmFnZTogMCBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogMC44OTQwODA1IFxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogMC40ODczMzYgXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiAwLjQxNTczMjkgXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3BoX2ZpdF9tb2RlbF9waFxucGggU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogTmFOIFxuXG5Db3ZlcmFnZTogMSBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogTm90IGF2YWlsYWJsZVxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogTm90IGF2YWlsYWJsZVxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogTm90IGF2YWlsYWJsZVxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9waF9maXRfbW9kZWxfcm9jXG5yb2MgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMy4wMjA4NyBcblxuQ292ZXJhZ2U6IDAgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IE5vdCBhdmFpbGFibGVcblxuSVRWIChjb25kaXRpb25hbCBUVik6IE5vdCBhdmFpbGFibGVcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IE5vdCBhdmFpbGFibGVcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfcGhfZml0X21vZGVsX3ByZWQuYWRqXG5wcmVkLmFkaiBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjQ0NDcxMDQgXG5cbkNvdmVyYWdlOiAwIFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiBOb3QgYXZhaWxhYmxlXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiBOb3QgYXZhaWxhYmxlXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiBOb3QgYXZhaWxhYmxlXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3BvX2ZpdF9tb2RlbF9ucFxubnAgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMC41MTIwOTQxIFxuXG5Db3ZlcmFnZTogMCBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogNy4zNjM4MDEgXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiAwLjY1MzkxOTcgXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiAwLjQ4MTM5MjUgXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3BvX2ZpdF9tb2RlbF9waFxucGggU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMC4wMDMxNDM0MjEgXG5cbkNvdmVyYWdlOiAxIFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiAwLjQyMDE1NTUgXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiAwLjU5OTY2OTIgXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiAwLjUxMzk4OSBcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfcG9fZml0X21vZGVsX3JvY1xucm9jIFNpbXVsYXRpb24gUmVzdWx0c1xuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5QYXJhbWV0ZXJzOiBuID0gMTAwICwgbSA9IDEgLCBzZXR1cCA9IDAgXG5cbk1TRSAobWFyZ2luYWwgbWVhbik6IDEwLjE2NTA2IFxuXG5Db3ZlcmFnZTogMCBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogTm90IGF2YWlsYWJsZVxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogTm90IGF2YWlsYWJsZVxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogTm90IGF2YWlsYWJsZVxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9wb19maXRfbW9kZWxfcHJlZC5hZGpcbnByZWQuYWRqIFNpbXVsYXRpb24gUmVzdWx0c1xuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5QYXJhbWV0ZXJzOiBuID0gMTAwICwgbSA9IDEgLCBzZXR1cCA9IDAgXG5cbk1TRSAobWFyZ2luYWwgbWVhbik6IDEuMTg3NTI0IFxuXG5Db3ZlcmFnZTogMCBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogTm90IGF2YWlsYWJsZVxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogTm90IGF2YWlsYWJsZVxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogTm90IGF2YWlsYWJsZVxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9yZWFsX2ZpdF9tb2RlbF9ucFxubnAgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMC4wNjM0MzI0MSBcblxuQ292ZXJhZ2U6IDEgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IDAuMDgzMDk0ODQgXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiAwLjI0NDA0MDIgXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiAwLjI0MzU4MTIgXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3JlYWxfZml0X21vZGVsX3BoXG5waCBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjAwMjkxMTE4MiBcblxuQ292ZXJhZ2U6IDEgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IDAuMjY4ODk0NCBcblxuSVRWIChjb25kaXRpb25hbCBUVik6IDAuMjM4Nzg4MiBcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IDAuMTEzMzQyMSBcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfcmVhbF9maXRfbW9kZWxfcm9jXG5yb2MgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gMSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMS41NjQ3MDYgXG5cbkNvdmVyYWdlOiAwIFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiBOb3QgYXZhaWxhYmxlXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiBOb3QgYXZhaWxhYmxlXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiBOb3QgYXZhaWxhYmxlXG5cbiRuXzEwMF9zaW11bGF0ZV9kYXRhX3JlYWxfZml0X21vZGVsX3ByZWQuYWRqXG5wcmVkLmFkaiBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSAxICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjI5NDk2OTcgXG5cbkNvdmVyYWdlOiAwIFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiBOb3QgYXZhaWxhYmxlXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiBOb3QgYXZhaWxhYmxlXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiBOb3QgYXZhaWxhYmxlXG4ifQ== -->
+<!-- rnb-output-begin eyJkYXRhIjoiJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX25wXG5ucCBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSA1ICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjEwMzcyMjcgXG5cbkNvdmVyYWdlOiAwLjggXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IDAuMTAzNzIyNyBcblxuSVRWIChjb25kaXRpb25hbCBUVik6IDAuNDM2Njk5NCBcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IDAuNDM2Njk5NCBcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX3BoXG5waCBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSA1ICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjI5MTgzNTYgXG5cbkNvdmVyYWdlOiAwLjYgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IDEuMzc3NjA2IFxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogMC41MDY3OTcyIFxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogMC40NzMzNzMyIFxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9ucF9maXRfbW9kZWxfcG9cbnBvIFNpbXVsYXRpb24gUmVzdWx0c1xuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5QYXJhbWV0ZXJzOiBuID0gMTAwICwgbSA9IDUgLCBzZXR1cCA9IDAgXG5cbk1TRSAobWFyZ2luYWwgbWVhbik6IDAuMTQxNjcyNSBcblxuQ292ZXJhZ2U6IDAuNiBcblxuSVNFIChjb25kaXRpb25hbCBtZWFuKTogMC42NTQyNTE4IFxuXG5JVFYgKGNvbmRpdGlvbmFsIFRWKTogMC40NjAyNzE5IFxuXG5NYXJnaW5hbCBUViBkaXN0YW5jZTogMC40NDY1NTUzIFxuXG4kbl8xMDBfc2ltdWxhdGVfZGF0YV9ucF9maXRfbW9kZWxfcm9jXG5yb2MgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gNSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMTQuMjUgXG5cbkNvdmVyYWdlOiAwLjIgXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IE5vdCBhdmFpbGFibGVcblxuSVRWIChjb25kaXRpb25hbCBUVik6IE5vdCBhdmFpbGFibGVcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IE5vdCBhdmFpbGFibGVcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX3ByZWRcbnByZWQgU2ltdWxhdGlvbiBSZXN1bHRzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblBhcmFtZXRlcnM6IG4gPSAxMDAgLCBtID0gNSAsIHNldHVwID0gMCBcblxuTVNFIChtYXJnaW5hbCBtZWFuKTogMC4xMDI0MzggXG5cbkNvdmVyYWdlOiAwLjggXG5cbklTRSAoY29uZGl0aW9uYWwgbWVhbik6IE5vdCBhdmFpbGFibGVcblxuSVRWIChjb25kaXRpb25hbCBUVik6IE5vdCBhdmFpbGFibGVcblxuTWFyZ2luYWwgVFYgZGlzdGFuY2U6IE5vdCBhdmFpbGFibGVcblxuJG5fMTAwX3NpbXVsYXRlX2RhdGFfbnBfZml0X21vZGVsX3ByZWQuYWRqXG5wcmVkLmFkaiBTaW11bGF0aW9uIFJlc3VsdHNcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuUGFyYW1ldGVyczogbiA9IDEwMCAsIG0gPSA1ICwgc2V0dXAgPSAwIFxuXG5NU0UgKG1hcmdpbmFsIG1lYW4pOiAwLjA5MzY1MDcxIFxuXG5Db3ZlcmFnZTogMC44IFxuXG5JU0UgKGNvbmRpdGlvbmFsIG1lYW4pOiBOb3QgYXZhaWxhYmxlXG5cbklUViAoY29uZGl0aW9uYWwgVFYpOiBOb3QgYXZhaWxhYmxlXG5cbk1hcmdpbmFsIFRWIGRpc3RhbmNlOiBOb3QgYXZhaWxhYmxlXG4ifQ== -->
 <pre><code>$n_100_simulate_data_np_fit_model_np
 np Simulation Results
 ------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
+Parameters: n = 100 , m = 5 , setup = 0 
 
-MSE (marginal mean): 0.02177472 
+MSE (marginal mean): 0.1037227 
 
-Coverage: 1 
+Coverage: 0.8 
 
-ISE (conditional mean): 0.02177472 
+ISE (conditional mean): 0.1037227 
 
-ITV (conditional TV): 0.5565217 
+ITV (conditional TV): 0.4366994 
 
-Marginal TV distance: 0.5565217 
+Marginal TV distance: 0.4366994 
 
 $n_100_simulate_data_np_fit_model_ph
 ph Simulation Results
 ------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
+Parameters: n = 100 , m = 5 , setup = 0 
 
-MSE (marginal mean): 0.03842234 
+MSE (marginal mean): 0.2918356 
 
-Coverage: 1 
+Coverage: 0.6 
 
-ISE (conditional mean): 0.5096638 
+ISE (conditional mean): 1.377606 
 
-ITV (conditional TV): 0.5181671 
+ITV (conditional TV): 0.5067972 
 
-Marginal TV distance: 0.4900592 
+Marginal TV distance: 0.4733732 
+
+$n_100_simulate_data_np_fit_model_po
+po Simulation Results
+------------------------
+Parameters: n = 100 , m = 5 , setup = 0 
+
+MSE (marginal mean): 0.1416725 
+
+Coverage: 0.6 
+
+ISE (conditional mean): 0.6542518 
+
+ITV (conditional TV): 0.4602719 
+
+Marginal TV distance: 0.4465553 
 
 $n_100_simulate_data_np_fit_model_roc
 roc Simulation Results
 ------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
+Parameters: n = 100 , m = 5 , setup = 0 
 
-MSE (marginal mean): 2.25 
+MSE (marginal mean): 14.25 
 
-Coverage: 1 
+Coverage: 0.2 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_np_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 100 , m = 5 , setup = 0 
+
+MSE (marginal mean): 0.102438 
+
+Coverage: 0.8 
 
 ISE (conditional mean): Not available
 
@@ -2023,191 +1983,11 @@ Marginal TV distance: Not available
 $n_100_simulate_data_np_fit_model_pred.adj
 pred.adj Simulation Results
 ------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
+Parameters: n = 100 , m = 5 , setup = 0 
 
-MSE (marginal mean): 0.0317051 
+MSE (marginal mean): 0.09365071 
 
-Coverage: 1 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_ph_fit_model_np
-np Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.3493272 
-
-Coverage: 0 
-
-ISE (conditional mean): 0.8940805 
-
-ITV (conditional TV): 0.487336 
-
-Marginal TV distance: 0.4157329 
-
-$n_100_simulate_data_ph_fit_model_ph
-ph Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): NaN 
-
-Coverage: 1 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_ph_fit_model_roc
-roc Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 3.02087 
-
-Coverage: 0 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_ph_fit_model_pred.adj
-pred.adj Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.4447104 
-
-Coverage: 0 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_po_fit_model_np
-np Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.5120941 
-
-Coverage: 0 
-
-ISE (conditional mean): 7.363801 
-
-ITV (conditional TV): 0.6539197 
-
-Marginal TV distance: 0.4813925 
-
-$n_100_simulate_data_po_fit_model_ph
-ph Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.003143421 
-
-Coverage: 1 
-
-ISE (conditional mean): 0.4201555 
-
-ITV (conditional TV): 0.5996692 
-
-Marginal TV distance: 0.513989 
-
-$n_100_simulate_data_po_fit_model_roc
-roc Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 10.16506 
-
-Coverage: 0 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_po_fit_model_pred.adj
-pred.adj Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 1.187524 
-
-Coverage: 0 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_real_fit_model_np
-np Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.06343241 
-
-Coverage: 1 
-
-ISE (conditional mean): 0.08309484 
-
-ITV (conditional TV): 0.2440402 
-
-Marginal TV distance: 0.2435812 
-
-$n_100_simulate_data_real_fit_model_ph
-ph Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.002911182 
-
-Coverage: 1 
-
-ISE (conditional mean): 0.2688944 
-
-ITV (conditional TV): 0.2387882 
-
-Marginal TV distance: 0.1133421 
-
-$n_100_simulate_data_real_fit_model_roc
-roc Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 1.564706 
-
-Coverage: 0 
-
-ISE (conditional mean): Not available
-
-ITV (conditional TV): Not available
-
-Marginal TV distance: Not available
-
-$n_100_simulate_data_real_fit_model_pred.adj
-pred.adj Simulation Results
-------------------------
-Parameters: n = 100 , m = 1 , setup = 0 
-
-MSE (marginal mean): 0.2949697 
-
-Coverage: 0 
+Coverage: 0.8 
 
 ISE (conditional mean): Not available
 
@@ -2217,7 +1997,7 @@ Marginal TV distance: Not available</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2ltdWxhdGlvbiBSZXBvcnQiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQpsaWJyYXJ5KGdncGxvdDIpCgpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL01JQ191dGlscy5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9ucF9zaW11bGF0aW9uLlIiKQpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL3BoX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvcG9fc2ltdWxhdGlvbi5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9yZWFsX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvZ2VuZXJpY19zaW11bGF0aW9uLlIiKQpgYGAKCiNEYXRhIHZpc3VhbGl6YXRpb24gCmBgYHtyfQoKZGYgPC0gdHJhbnNmb3JtX2RmKHNpbXVsYXRlX2RhdGFfcmVhbChuID0gMTAwMCkkZGF0YWZyYW1lLCBzY29yZV9tYXggPSAxMSkKbWVhbihkZiRUKQoKZGZfIDwtIGRmICU+JSBmaWx0ZXIocmFjZSA9PSAwLCBzZXggPT0gMSkKCm5yb3coZGYgJT4lIGZpbHRlcihJbmRpY2F0b3IgPT0gMSkpIC8gbnJvdyhkZikKCm1lYW4oZGYkVCkKCmJhcnBsb3QodGFibGUoZGZfJFQpLAogICAgICAgIG1haW4gPSAiQmFyIFBsb3Qgb2YgRGlzY3JldGUgRXZlbnQgVGltZXMiLAogICAgICAgIHhsYWIgPSAiRXZlbnQgVGltZSAoVCkiLAogICAgICAgIHlsYWIgPSAiRnJlcXVlbmN5IiwKICAgICAgICBjb2wgPSAibGlnaHRibHVlIikKCmJhcnBsb3QodGFibGUoZGYkRGVsdGEpLAogICAgICAgIG1haW4gPSAiQmFyIFBsb3Qgb2YgRGVsdGEiLAogICAgICAgIHhsYWIgPSAiRGVsdGEiLAogICAgICAgIHlsYWIgPSAiRnJlcXVlbmN5IiwKICAgICAgICBjb2wgPSAibGlnaHRibHVlIikKCmNvcihkZiRULCBkZiREZWx0YSkKCnRpbWUgPC0gc3lzdGVtLnRpbWUoewogIGZpdF8gPC0gTUlDKGRmLCB1c2VyX2Zvcm11bGEgPSAiY29udCArIGZhY3RvcihzZXgpICsgZmFjdG9yKHJhY2UpIiwgbWV0aG9kID0gInBoIikKfSkKZml0IDwtIE1JQyhkZiwgbWV0aG9kID0gInByZWQuYWRqIikKCmZpdCRtZWFuVApmaXRfJG1lYW5UCgoKcGxvdCgxOjEwLCBwbWYoZml0XyRtb2RlbCwgY292PSBsaXN0KHJhY2UgPSAwLCBzZXggPSAwLCBjb250ID0gODApLCBtYXhfdGltZSA9IDEwKSR5KQojcHJpbnQoZml0KQojcHJpbnQoZml0XykKCmRmCnRpbWUKYGBgCgoKYGBge3J9CnJlcyA8LSBzaW11bGF0ZV9kYXRhX3BvKG4gPSA0MDApCmNvbmRfcG1mIDwtIHJlcyRjb25kX3BtZgpjb25kX3BtZigwLCAwLCAwKQoKYGBgCgpgYGB7cn0KI3Jlc3VsdDwtIHJ1bl9zaW11bGF0aW9ucyhzZXR1cCA9IDAsIG0gPSAyKQojcHJpbnQocmVzdWx0KQojc2F2ZShyZXN1bHQsIGZpbGUgPSAic2ltdWxhdGlvbl9yZXN1bHRzL1JEYXRhL0FwcmlsXzE4XzIwMjVfc2ltdWxhdGlvbi5SRGF0YSIpCgpwX3Jlc3VsdCA8LSBydW5fc2ltdWxhdGlvbnMoc2V0dXAgPSAwLCBtID0gMTAwLCBzaW1fbW9kZWwgPSBjKCJzaW11bGF0ZV9kYXRhX25wIiwgInNpbXVsYXRlX2RhdGFfcGgiLCAic2ltdWxhdGVfZGF0YV9wbyIsICJzaW11bGF0ZV9kYXRhX3JlYWwiKSwgbW9kZWwgPSBjKCJucCIsInBoIiwicG8iLCJyb2MiLCJwcmVkIiwicHJlZC5hZGoiKSwgYm9vdCA9IFRSVUUpCnByaW50KHBfcmVzdWx0KQoKYGBgCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2ltdWxhdGlvbiBSZXBvcnQiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQpsaWJyYXJ5KGdncGxvdDIpCgpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL01JQ191dGlscy5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9ucF9zaW11bGF0aW9uLlIiKQpzb3VyY2UoInNpbXVsYXRpb25fZnVuY3Rpb25zL3BoX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvcG9fc2ltdWxhdGlvbi5SIikKc291cmNlKCJzaW11bGF0aW9uX2Z1bmN0aW9ucy9yZWFsX3NpbXVsYXRpb24uUiIpCnNvdXJjZSgic2ltdWxhdGlvbl9mdW5jdGlvbnMvZ2VuZXJpY19zaW11bGF0aW9uLlIiKQpgYGAKCiNEYXRhIHZpc3VhbGl6YXRpb24gCmBgYHtyfQoKZGYgPC0gdHJhbnNmb3JtX2RmKHNpbXVsYXRlX2RhdGFfcmVhbChuID0gMTAwMCkkZGF0YWZyYW1lLCBzY29yZV9tYXggPSAxMSkKbWVhbihkZiRUKQoKZGZfIDwtIGRmICU+JSBmaWx0ZXIocmFjZSA9PSAwLCBzZXggPT0gMSkKCm5yb3coZGYgJT4lIGZpbHRlcihJbmRpY2F0b3IgPT0gMSkpIC8gbnJvdyhkZikKCm1lYW4oZGYkVCkKCmJhcnBsb3QodGFibGUoZGZfJFQpLAogICAgICAgIG1haW4gPSAiQmFyIFBsb3Qgb2YgRGlzY3JldGUgRXZlbnQgVGltZXMiLAogICAgICAgIHhsYWIgPSAiRXZlbnQgVGltZSAoVCkiLAogICAgICAgIHlsYWIgPSAiRnJlcXVlbmN5IiwKICAgICAgICBjb2wgPSAibGlnaHRibHVlIikKCmJhcnBsb3QodGFibGUoZGYkRGVsdGEpLAogICAgICAgIG1haW4gPSAiQmFyIFBsb3Qgb2YgRGVsdGEiLAogICAgICAgIHhsYWIgPSAiRGVsdGEiLAogICAgICAgIHlsYWIgPSAiRnJlcXVlbmN5IiwKICAgICAgICBjb2wgPSAibGlnaHRibHVlIikKCmNvcihkZiRULCBkZiREZWx0YSkKCnRpbWUgPC0gc3lzdGVtLnRpbWUoewogIGZpdF8gPC0gTUlDKGRmLCB1c2VyX2Zvcm11bGEgPSAiY29udCArIGZhY3RvcihzZXgpICsgZmFjdG9yKHJhY2UpIiwgbWV0aG9kID0gInBoIikKfSkKZml0IDwtIE1JQyhkZiwgbWV0aG9kID0gInByZWQuYWRqIikKCmZpdCRtZWFuVApmaXRfJG1lYW5UCgoKcGxvdCgxOjEwLCBwbWYoZml0XyRtb2RlbCwgY292PSBsaXN0KHJhY2UgPSAwLCBzZXggPSAwLCBjb250ID0gODApLCBtYXhfdGltZSA9IDEwKSR5KQojcHJpbnQoZml0KQojcHJpbnQoZml0XykKCmRmCnRpbWUKYGBgCgoKYGBge3J9CnJlcyA8LSBzaW11bGF0ZV9kYXRhX3BvKG4gPSA0MDApCmNvbmRfcG1mIDwtIHJlcyRjb25kX3BtZgpjb25kX3BtZigwLCAwLCAwKQoKYGBgCgpgYGB7cn0KI3Jlc3VsdDwtIHJ1bl9zaW11bGF0aW9ucyhzZXR1cCA9IDAsIG0gPSAyKQojcHJpbnQocmVzdWx0KQojc2F2ZShyZXN1bHQsIGZpbGUgPSAic2ltdWxhdGlvbl9yZXN1bHRzL1JEYXRhL0FwcmlsXzE4XzIwMjVfc2ltdWxhdGlvbi5SRGF0YSIpCgpwX3Jlc3VsdCA8LSBydW5fc2ltdWxhdGlvbnMoc2V0dXAgPSAwLCBtID0gNSwgc2ltX21vZGVsID0gYygic2ltdWxhdGVfZGF0YV9ucCIpLCBtb2RlbCA9IGMoIm5wIiwicGgiLCJwbyIsInJvYyIsInByZWQiLCJwcmVkLmFkaiIpLCBib290ID0gVFJVRSkKcHJpbnQocF9yZXN1bHQpCgpgYGAK</div>
 
 
 

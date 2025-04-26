@@ -1,9 +1,9 @@
 #!/bin/bash --login
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1 # number of core 
+#SBATCH --cpus-per-task=20 # number of core 
 #SBATCH --mem=1GB
 #SBATCH --job-name=test
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #SBATCH --output=./slurmout/%x-%j.SLURMout
 #SBATCH --array=1-4   # Now array is over setting (1 to 4)
 

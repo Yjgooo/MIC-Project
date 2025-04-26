@@ -70,7 +70,7 @@ cond_pmf(0, 0, 0)
 #print(result)
 #save(result, file = "simulation_results/RData/April_18_2025_simulation.RData")
 
-p_result <- run_simulations(setup = 0, m = 100, sim_model = c("simulate_data_np", "simulate_data_ph", "simulate_data_po", "simulate_data_real"), model = c("np","ph","po","roc","pred","pred.adj"), boot = TRUE)
+p_result <- run_simulations(setup = 0, m = 5, sim_model = c("simulate_data_np"), model = c("np","ph","po","roc","pred","pred.adj"), boot = TRUE)
 print(p_result)
 
 ```
