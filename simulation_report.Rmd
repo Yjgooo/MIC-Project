@@ -14,6 +14,9 @@ source("simulation_functions/real_simulation.R")
 source("simulation_functions/generic_simulation.R")
 ```
 
+
+
+
 #Data visualization 
 ```{r}
 
@@ -56,7 +59,17 @@ plot(1:10, pmf(fit_$model, cov= list(race = 0, sex = 0, cont = 80), max_time = 1
 df
 time
 ```
+```{r}
+library(microbenchmark)
 
+mb <- microbenchmark(
+  old = simulate_data_po_old(1000, seed = 100),
+  new = simulate_data_po(    1000, seed = 100),
+  times = 50
+)
+print(mb)
+
+```
 
 ```{r}
 res <- simulate_data_po(n = 400)
@@ -66,11 +79,30 @@ cond_pmf(0, 0, 0)
 ```
 
 ```{r}
+system.time({
+  p_result <- run_simulations(setup = 0, m = 100, sim_model = c("simulate_data_po", "simulate_data_ph"), model = c("po", "ph"), boot = TRUE)
+  print(p_result)
+})
+
+summarize_results(p_result, file = "results.csv")
+```
+```{r}
+plot_results_list(p_result)
+```
+
+```{r}
 #result<- run_simulations(setup = 0, m = 2)
 #print(result)
 #save(result, file = "simulation_results/RData/April_18_2025_simulation.RData")
+system.time({
+  for(setup in seq(0.1, 0.5, by = 0.1)){
+    print("setup")
+    print(setup)
+    p_result <- run_simulations(setup = setup, m = 100, sim_model = c("simulate_data_po"), model = c("np","ph","po","pred","pred.adj"), boot = FALSE)
+    print(p_result)
+  }
+})
 
-p_result <- run_simulations(setup = 0, m = 5, sim_model = c("simulate_data_np"), model = c("np","ph","po","roc","pred","pred.adj"), boot = TRUE)
-print(p_result)
+
 
 ```

@@ -1,16 +1,17 @@
 
+library(parallel)
+
 generic_sim <- function(n, m, setup, cov = NULL,
                         sim_model = "simulate_data_np",
                         model     = "np",
                         N0        = 10000,
                         support   = 1:10,
                         boot      = FALSE) {
-  library(parallel)
   
-  #print("sim_model")
-  #print(sim_model)
-  #print("model")
-  #print(model)
+  print("sim_model")
+  print(sim_model)
+  print("model")
+  print(model)
   
   # 1. get simulation function
   sim <- get(sim_model)
@@ -94,7 +95,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
          itv = itv_val,
          tv_marg = tv_marg_val)
     
-  }, mc.cores = 20)
+  }, mc.cores = 6) #set number of cores to be 20 
   
   # Extract results from list
   se_vec      <- sapply(results_list, `[[`, "se")
@@ -265,7 +266,7 @@ generic_sim_nonparell <- function(n, m, setup, cov = NULL,
 #setup is fixed 
 run_simulations <- function(setup, cov = NULL, m = 100, boot = FALSE, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "roc", "pred", "pred.adj")) {
   # Define the sample sizes and simulation model choices
-  n_values <- c(100)
+  n_values <- c(100, 500, 1000)
   sim_models <- sim_models
   models <- models
   
@@ -293,6 +294,69 @@ run_simulations <- function(setup, cov = NULL, m = 100, boot = FALSE, sim_models
   return(results_list)
 }
 
+
+summarize_results <- function(results_list, file = "results.csv") {
+  summary_rows <- list()
+  
+  for (key in names(results_list)) {
+    res <- results_list[[key]]
+    
+    # parse name
+    parts     <- strsplit(key, "_")[[1]]
+    n_val     <- as.integer(parts[2])
+    sim_model <- parts[3]
+    fit_model <- parts[6]
+    
+    # warn if any NAs in the metric vectors
+    for (metric in c("ise", "itv", "tv_marg")) {
+      vec <- res[[metric]]
+      if (!all(is.na(vec))) {
+        prop_na <- mean(is.na(vec))
+        if (prop_na > 0) {
+          warning(sprintf(
+            "%s: %.1f%% of %s replicates are NA",
+            key, 100 * prop_na, toupper(metric)
+          ), call. = FALSE)
+        }
+      }
+    }
+    
+    # compact summary
+    mse      <- mean(res$se,      na.rm = TRUE)
+    bias     <- mean(res$bias,    na.rm = TRUE)
+    coverage <- mean(res$coverage, na.rm = TRUE)
+    ise      <- if (all(is.na(res$ise)))     NA else mean(res$ise,     na.rm = TRUE)
+    itv      <- if (all(is.na(res$itv)))     NA else mean(res$itv,     na.rm = TRUE)
+    tv_marg  <- if (all(is.na(res$tv_marg))) NA else mean(res$tv_marg, na.rm = TRUE)
+    
+    this_row <- data.frame(
+      n         = n_val,
+      setup     = res$setup,
+      sim_model = sim_model,
+      fit_model = fit_model,
+      MSE       = mse,
+      Bias      = bias,
+      Coverage  = coverage,
+      ISE       = ise,
+      ITV       = itv,
+      TV_marg   = tv_marg,
+      stringsAsFactors = FALSE
+    )
+    
+    summary_rows[[key]] <- this_row
+  }
+  
+  summary_df <- do.call(rbind, summary_rows)
+  write.csv(summary_df, file = file, row.names = FALSE)
+  message("Wrote summary to ", file)
+  invisible(summary_df)
+}
+
+
+# Example usage:
+# results_list <- run_simulations(setup = 0, m = 50)   # or however you generate it
+# summarize_results(results_list, file = "results.csv")
+
 print.mega <- function(x) {
   cat(x$model, "Simulation Results\n")
   cat("------------------------\n")
@@ -301,8 +365,11 @@ print.mega <- function(x) {
   # Marginal mean squared error
   cat("MSE (marginal mean):", mean(x$se, na.rm = TRUE), "\n\n")
   
+  # Bias
+  cat("Bias:", mean(x$bias, na.rm = TRUE), "\n\n")
+  
   # Coverage
-  cat("Coverage:", mean(x$coverage), "\n\n")
+  cat("Coverage:", mean(x$coverage, na.rm = TRUE), "\n\n")
   
   # Integrated squared error (conditional mean)
   if (all(is.na(x$ise))) {

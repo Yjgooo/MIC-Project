@@ -1,0 +1,45 @@
+$n_100_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1384971 
+
+Coverage: 0.14 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1021877 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1105204 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+

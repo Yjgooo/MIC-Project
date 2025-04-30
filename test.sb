@@ -1,24 +1,32 @@
 #!/bin/bash --login
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=20 # number of core 
-#SBATCH --mem=1GB
+#SBATCH --cpus-per-task=21                  # 4 cores should be enough unless you need more
+#SBATCH --mem=31G                           # Safer memory per job
 #SBATCH --job-name=test
-#SBATCH --time=00:20:00
-#SBATCH --output=./slurmout/%x-%j.SLURMout
-#SBATCH --array=1-4   # Now array is over setting (1 to 4)
+#SBATCH --time=10:00:00
+#SBATCH --output=slurmout/%x-%A_%a.SLURMout  # output file: jobname-masterID_arrayID.SLURMout
+#SBATCH --array=1-24                        # 4 settings × 6 algorithms
 
+# 1. Make sure the slurmout directory exists
+mkdir -p slurmout
+
+# 2. Load modules
 module purge
 module load GCC/13.2.0 
 module load R/4.3.3-gfbf-2023b
 
-echo start: $(date +%H:%M:%S)
+# 3. Echo start time
+echo "start: $(date +%H:%M:%S)"
 
+# 4. Calculate setting and algorithm based on array ID
+setting=$(( (SLURM_ARRAY_TASK_ID - 1) / 6 + 1 ))
+algorithm=$(( (SLURM_ARRAY_TASK_ID - 1) % 6 + 1 ))
 
-setting=$SLURM_ARRAY_TASK_ID
+# 5. Print what is running
+echo "Running Setting=$setting Algorithm=$algorithm"
 
-for (( algorithm=1; algorithm<=6; algorithm++ )); do
-    #echo "Running Setting $setting, Algorithm $algorithm"
-    Rscript test.R $setting $algorithm
-done
+# 6. Run Rscript with setting and algorithm as arguments
+Rscript test.R "$setting" "$algorithm"
 
-echo end: $(date +%H:%M:%S)
+# 7. Echo end time
+echo "end: $(date +%H:%M:%S)"

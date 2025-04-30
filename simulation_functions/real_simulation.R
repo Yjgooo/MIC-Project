@@ -32,9 +32,46 @@ simulate_data_real <- function(
     T_vals     = 1:10
     # Delta ~ discrete normal conditional on X
     coefs_D = c(intercept = 1, sex = 0.5, race = 0, cont = 0.01)
-    sd_D     = 5
+    sd_D     = 2
+    # T ~ discrete normal conditional on Delta and X
+    coefs_T = c(intercept = 1, Delta = 1, sex = 0.4, race = -0.2, cont = -0.01)
+    sd_T     = 2
+    
+  }else if(setup == 0.2){
+    Delta_vals = -5:10
+    T_vals     = 1:10
+    # Delta ~ discrete normal conditional on X
+    coefs_D = c(intercept = 1, sex = 0.5, race = 0, cont = 0.01)
+    sd_D     = 2
+    # T ~ discrete normal conditional on Delta and X
+    coefs_T = c(intercept = 1, Delta = 2, sex = 0.4, race = -0.2, cont = -0.01)
+    sd_T     = 2
+  }else if(setup == 0.3){
+    Delta_vals = -5:10
+    T_vals     = 1:10
+    # Delta ~ discrete normal conditional on X
+    coefs_D = c(intercept = 1, sex = 0.5, race = 0, cont = 0.01)
+    sd_D     = 2
+    # T ~ discrete normal conditional on Delta and X
+    coefs_T = c(intercept = 1, Delta = 3, sex = 0.4, race = -0.2, cont = -0.01)
+    sd_T     = 2
+  }else if(setup == 0.4){
+    Delta_vals = -5:10
+    T_vals     = 1:10
+    # Delta ~ discrete normal conditional on X
+    coefs_D = c(intercept = 1, sex = 0.5, race = 0, cont = 0.01)
+    sd_D     = 2
     # T ~ discrete normal conditional on Delta and X
     coefs_T = c(intercept = 1, Delta = 4, sex = 0.4, race = -0.2, cont = -0.01)
+    sd_T     = 2
+  }else if(setup == 0.5){
+    Delta_vals = -5:10
+    T_vals     = 1:10
+    # Delta ~ discrete normal conditional on X
+    coefs_D = c(intercept = 1, sex = 0.5, race = 0, cont = 0.01)
+    sd_D     = 2
+    # T ~ discrete normal conditional on Delta and X
+    coefs_T = c(intercept = 1, Delta = 1.5, sex = 0.4, race = -0.2, cont = -0.01)
     sd_T     = 2
   }else if(setup == 1.1){ # Makes sex to have strong effect on T
     # supports
@@ -49,7 +86,6 @@ simulate_data_real <- function(
   }
   
   # 1) Generate covariates
-  print(n)
   sex  <- sample(0:1, n, TRUE)
   race <- sample(0:2, n, TRUE)
   cont <- rnorm(n, 65, 10)

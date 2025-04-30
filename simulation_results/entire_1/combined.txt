@@ -1,0 +1,783 @@
+$n_100_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2003727 
+
+Coverage: 0.75 
+
+ISE (conditional mean): 0.2003727 
+
+ITV (conditional TV): 0.469553 
+
+Marginal TV distance: 0.469553 
+
+$n_500_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.02943189 
+
+Coverage: 0.79 
+
+ISE (conditional mean): 0.02943189 
+
+ITV (conditional TV): 0.2737688 
+
+Marginal TV distance: 0.2737688 
+
+$n_1000_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.01741672 
+
+Coverage: 0.73 
+
+ISE (conditional mean): 0.01741672 
+
+ITV (conditional TV): 0.2102951 
+
+Marginal TV distance: 0.2102951 
+
+$n_100_simulate_data_np_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1701616 
+
+Coverage: 0.6 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_np_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1013905 
+
+Coverage: 0.27 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_np_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.08436046 
+
+Coverage: 0.07 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_np_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1113197 
+
+Coverage: 0.7 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_np_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.06317923 
+
+Coverage: 0.41 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_np_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.04698536 
+
+Coverage: 0.22 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_np_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 7.6675 
+
+Coverage: 0.5 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_np_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 8.33 
+
+Coverage: 0.24 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_np_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 9.31 
+
+Coverage: 0.19 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_ph_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.06701667 
+
+Coverage: 0.82 
+
+ISE (conditional mean): 0.6070559 
+
+ITV (conditional TV): 0.4016503 
+
+Marginal TV distance: 0.3330111 
+
+$n_500_simulate_data_ph_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.01778982 
+
+Coverage: 0.83 
+
+ISE (conditional mean): 0.5729975 
+
+ITV (conditional TV): 0.3511934 
+
+Marginal TV distance: 0.2471645 
+
+$n_1000_simulate_data_ph_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.01137887 
+
+Coverage: 0.71 
+
+ISE (conditional mean): 0.5654183 
+
+ITV (conditional TV): 0.3427399 
+
+Marginal TV distance: 0.2298396 
+
+$n_100_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1384971 
+
+Coverage: 0.14 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1021877 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_ph_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1105204 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_ph_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.06063155 
+
+Coverage: 0.39 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_ph_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.04608937 
+
+Coverage: 0.07 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_ph_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.05380288 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_ph_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 3.625034 
+
+Coverage: 0.15 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_ph_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 3.574926 
+
+Coverage: 0.01 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_ph_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 3.878854 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_po_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.3766268 
+
+Coverage: 0.68 
+
+ISE (conditional mean): 7.311392 
+
+ITV (conditional TV): 0.6323011 
+
+Marginal TV distance: 0.496688 
+
+$n_500_simulate_data_po_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.1202216 
+
+Coverage: 0.51 
+
+ISE (conditional mean): 7.048624 
+
+ITV (conditional TV): 0.5946744 
+
+Marginal TV distance: 0.4491943 
+
+$n_1000_simulate_data_po_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.06218043 
+
+Coverage: 0.53 
+
+ISE (conditional mean): 7.031787 
+
+ITV (conditional TV): 0.5893121 
+
+Marginal TV distance: 0.4498714 
+
+$n_100_simulate_data_po_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.684773 
+
+Coverage: 0.21 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_po_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.5244104 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_po_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.4553454 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_po_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.3435001 
+
+Coverage: 0.41 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_po_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2081533 
+
+Coverage: 0.05 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_po_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2464007 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_po_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 8.354239 
+
+Coverage: 0.77 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_po_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 6.071574 
+
+Coverage: 0.93 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_po_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 7.483862 
+
+Coverage: 0.95 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_real_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.09929672 
+
+Coverage: 0.64 
+
+ISE (conditional mean): 0.1185956 
+
+ITV (conditional TV): 0.2986501 
+
+Marginal TV distance: 0.2960401 
+
+$n_500_simulate_data_real_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.02882904 
+
+Coverage: 0.61 
+
+ISE (conditional mean): 0.04843032 
+
+ITV (conditional TV): 0.1670629 
+
+Marginal TV distance: 0.1619245 
+
+$n_1000_simulate_data_real_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.01825799 
+
+Coverage: 0.53 
+
+ISE (conditional mean): 0.03712105 
+
+ITV (conditional TV): 0.1186915 
+
+Marginal TV distance: 0.111829 
+
+$n_100_simulate_data_real_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.4611411 
+
+Coverage: 0.24 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_real_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.4398189 
+
+Coverage: 0.01 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_real_fit_model_pred.adj
+pred.adj Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.3958395 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_real_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.3907235 
+
+Coverage: 0.19 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_real_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2726653 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_real_fit_model_pred
+pred Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2846092 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_real_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 1.602265 
+
+Coverage: 0.06 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_500_simulate_data_real_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 1.576485 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_1000_simulate_data_real_fit_model_roc
+roc Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 1.582061 
+
+Coverage: 0 
+
+ISE (conditional mean): Not available
+
+ITV (conditional TV): Not available
+
+Marginal TV distance: Not available
+
+$n_100_simulate_data_po_fit_model_po
+po Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.07900144 
+
+Coverage: 0.9 
+
+ISE (conditional mean): 0.4279048 
+
+ITV (conditional TV): 0.4070579 
+
+Marginal TV distance: 0.3379045 
+
+$n_100_simulate_data_po_fit_model_ph
+ph Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.3213492 
+
+Coverage: 0.88 
+
+ISE (conditional mean): 1.001606 
+
+ITV (conditional TV): 0.504445 
+
+Marginal TV distance: 0.4413854 
+
+$n_100_simulate_data_ph_fit_model_po
+po Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.05940498 
+
+Coverage: 0.88 
+
+ISE (conditional mean): 0.2259182 
+
+ITV (conditional TV): 0.3022985 
+
+Marginal TV distance: 0.2399257 
+
+$n_100_simulate_data_ph_fit_model_ph
+ph Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.02827055 
+
+Coverage: 0.97 
+
+ISE (conditional mean): 0.1664359 
+
+ITV (conditional TV): 0.2905401 
+
+Marginal TV distance: 0.2477611
+
+
+
+

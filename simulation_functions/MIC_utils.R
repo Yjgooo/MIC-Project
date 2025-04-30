@@ -1,9 +1,10 @@
 library(pROC)
 library(dplyr)
 library(icenReg)
+library(pROC)
 
 MIC <- function(df, method, user_formula = NULL, cov = NULL, 
-                conf_level = 0.95, nboot = 10, boot = FALSE) {
+                conf_level = 0.95, nboot = 1000, boot = FALSE) {
   
   # Fit the model based on the specified method.
   if(method == "np"){
@@ -15,7 +16,6 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
     model <- ic_sp(full_formula, data = df, model = method)
   } else if(method %in% c("roc", "pred", "pred.adj")){
     if(method == "roc"){
-      library(pROC)
       rocobj <- roc(Indicator ~ Delta, data = df, quiet = TRUE)
       cuty <- coords(rocobj, x = "best", input = "threshold", ret = "threshold", 
                      best.method = "youden", transpose = TRUE)
@@ -73,12 +73,11 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
     meanD = meanD
   )
   
-  # Only perform bootstrap if boot == TRUE.
-  if(boot){
-    boot_estimates <- replicate(nboot, {
+  #Bootstrap 
+  if(boot){ 
+    boot_estimates <- replicate(nboot, { #replicateds 
       indices <- sample(1:nrow(df), replace = TRUE)
-      # Call MIC with boot = FALSE to avoid recursion of bootstrap
-      res_boot <- MIC(df[indices, ], method, user_formula, cov, conf_level, nboot, boot = FALSE)
+      res_boot <- MIC(df[indices, ], method, user_formula, cov, conf_level, nboot, boot = FALSE)  # Call MIC with boot = FALSE to avoid recursion of bootstrap
       return(res_boot$meanT)
     })
     alpha <- (1 - conf_level) / 2

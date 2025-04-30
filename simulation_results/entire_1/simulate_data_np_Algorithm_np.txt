@@ -1,0 +1,45 @@
+$n_100_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 100 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.2003727 
+
+Coverage: 0.75 
+
+ISE (conditional mean): 0.2003727 
+
+ITV (conditional TV): 0.469553 
+
+Marginal TV distance: 0.469553 
+
+$n_500_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 500 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.02943189 
+
+Coverage: 0.79 
+
+ISE (conditional mean): 0.02943189 
+
+ITV (conditional TV): 0.2737688 
+
+Marginal TV distance: 0.2737688 
+
+$n_1000_simulate_data_np_fit_model_np
+np Simulation Results
+------------------------
+Parameters: n = 1000 , m = 100 , setup = 0 
+
+MSE (marginal mean): 0.01741672 
+
+Coverage: 0.73 
+
+ISE (conditional mean): 0.01741672 
+
+ITV (conditional TV): 0.2102951 
+
+Marginal TV distance: 0.2102951 
+
