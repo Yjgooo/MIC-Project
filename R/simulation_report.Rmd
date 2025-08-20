@@ -1,6 +1,6 @@
 ---
 title: "Simulation Report"
-output: html_notebook
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

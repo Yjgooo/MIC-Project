@@ -1,9 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output: html_document
 ---
 
- 
 
 ```{r}
 source("simulation_functions/MIC_utils.R")
