@@ -6,15 +6,97 @@ output: html_notebook
  
 
 ```{r}
+source("simulation_functions/MIC_utils.R")
+source("simulation_functions/np_simulation.R")
+source("simulation_functions/ph_simulation.R")
+source("simulation_functions/po_simulation.R")
+source("simulation_functions/real_simulation.R")
+source("simulation_functions/generic_simulation.R")
 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+# Simulate dataset (X, D, I)
+simulate_adv <- function(n) {
+  Delta <- rnorm(n, mean = 3, sd = 1.2)
+  T  <- rnorm(n, mean = 3, sd = 1.2)   
+  #T <- rcauchy(n, location = 100, scale = 10)
+  #T <- runif(n, min = 1, max = 9)
+  Indicator <- as.integer(Delta >= T)
+  df    <- data.frame(Delta = Delta, T = T, Indicator = Indicator)
+  df
+}
+```
 
 ```{r}
+df <- simulate_adv(10000)
+df
+df <- transform_df(df, 200)
+
+pred <- MIC(df, "pred.adj")
+print(pred)
+
+pred.np <- MIC(df, "np")
+print(pred.np)
+
+```
+
+
+```{r}
+df <- simulate_data_np(100, setup=-3)$dataframe
+
+hist(df$Delta)
+hist(df$T)
+```
+
+```{r}
+# dmg.1 is for correlated simulation 
+#
+p_result <- run_simulations(setup = 'dmg.1', m = 100, sim_model = c("simulate_data_np"), model = c("np", "pred","pred.adj"), boot = TRUE)
+print(p_result)
+```
+
+```{r}
+p_result
+
+```
+
+
+```{r}
+ mu    <- c(1,5)
+ Sigma <- matrix(c(4,2, 2,2),2)
+ n<-3
+ 
+ # 1) pick a finite grid
+ xs <- -3:10
+ ys <- 1:10
+ grid <- expand.grid(x=xs, y=ys)
+ 
+ # 2) compute (unnormalized) probs
+ dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+ p    <- dens / sum(dens)
+ 
+ # 3) sample N indices with those probs
+ idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+ 
+ # 4) extract your integer draws
+ Delta <- grid[idx, 1]
+ T <- grid[idx, 2]
+ 
+ dim(p) <- c(14, 10)
+ marginal_p <- colSums(p)
+ marginal_p
+ 
+ 
+ 
+ Delta
+ T
+```
+
+
+
+```{r}
+
+
 
 ```

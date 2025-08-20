@@ -32,8 +32,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
                               X_large$sex,
                               X_large$cont))
   } else {
-    true_mean_vec <- with(X_large,
-                          mapply(cond_mean, Delta, race, sex, cont))
+    true_mean_vec <- with(X_large, mapply(cond_mean, Delta, race, sex, cont))
     true_pmf_mat  <- t(mapply(function(d,r,s,c) cond_pmf(d,r,s,c),
                               X_large$Delta,
                               X_large$race,
@@ -95,7 +94,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
          itv = itv_val,
          tv_marg = tv_marg_val)
     
-  }, mc.cores = 6) #set number of cores to be 20 
+  }, mc.cores = 6) # number of cores 
   
   # Extract results from list
   se_vec      <- sapply(results_list, `[[`, "se")
@@ -263,14 +262,14 @@ generic_sim_nonparell <- function(n, m, setup, cov = NULL,
 }
 
 
-#setup is fixed 
+# Setup is fixed 
 run_simulations <- function(setup, cov = NULL, m = 100, boot = FALSE, sim_models = c("simulate_data_po", "simulate_data_ph", "simulate_data_np", "simulate_data_real"), models = c("np", "ph", "po", "roc", "pred", "pred.adj")) {
   # Define the sample sizes and simulation model choices
   n_values <- c(100, 500, 1000)
   sim_models <- sim_models
   models <- models
   
-  # Container to store results for each combination
+  # Store results for each combination
   results_list <- list()
   
   # Loop over each sample size and simulation/model choice
@@ -321,7 +320,7 @@ summarize_results <- function(results_list, file = "results.csv") {
       }
     }
     
-    # compact summary
+    # Summary
     mse      <- mean(res$se,      na.rm = TRUE)
     bias     <- mean(res$bias,    na.rm = TRUE)
     coverage <- mean(res$coverage, na.rm = TRUE)
@@ -354,7 +353,7 @@ summarize_results <- function(results_list, file = "results.csv") {
 
 
 # Example usage:
-# results_list <- run_simulations(setup = 0, m = 50)   # or however you generate it
+# results_list <- run_simulations(setup = 0, m = 50)   
 # summarize_results(results_list, file = "results.csv")
 
 print.mega <- function(x) {

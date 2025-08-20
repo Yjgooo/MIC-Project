@@ -72,20 +72,31 @@ print(mb)
 ```
 
 ```{r}
-res <- simulate_data_po(n = 400)
-cond_pmf <- res$cond_pmf
-cond_pmf(0, 0, 0)
+david <- simulate_data_np(n = 100, setup = 5)$dataframe
+
+xi <- transform_df(df = david, score_max = 5)
+
+res <- MIC(df = xi, method = "pred.adj")
+
+res
+
 
 ```
 
+
+# Efficiency testing
+
+#For unparell n=1000, m = 1, nboot = 1000, sim_model = ph, model = ph, it takes 568.989 sec <= 10 min; so for n=1000, m=100, nboot = 1000, it takes 1.65 hours 
+# Meanwhil on HPCC n=100, m=10, nboot = 10, sim_model = ph, model = ph hasn't finished even after running for a hour 
 ```{r}
 system.time({
-  p_result <- run_simulations(setup = 0, m = 100, sim_model = c("simulate_data_po", "simulate_data_ph"), model = c("po", "ph"), boot = TRUE)
+  p_result <- run_simulations(setup = 0, m = 100, sim_model = c("simulate_data_po"), boot = TRUE)
   print(p_result)
 })
 
-summarize_results(p_result, file = "results.csv")
+#summarize_results(p_result, file = "results.csv")
 ```
+
 ```{r}
 plot_results_list(p_result)
 ```

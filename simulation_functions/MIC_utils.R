@@ -2,6 +2,9 @@ library(pROC)
 library(dplyr)
 library(icenReg)
 library(pROC)
+library(CopulaCenR)
+
+
 
 MIC <- function(df, method, user_formula = NULL, cov = NULL, 
                 conf_level = 0.95, nboot = 1000, boot = FALSE) {
@@ -52,7 +55,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
   if(method %in% c("roc", "pred", "pred.adj")){
     meanT <- model$threshold
   } else {
-    if(is.null(cov)){ # average the mean over the entire dataset
+    if(is.null(cov)){ # User want population-MIC -> average the mean over dataset
       n <- nrow(df)
       v <- numeric(n)
       cov_vec <- extract_covs(user_formula)
@@ -60,7 +63,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
         v[i] <- mean_from_surv(model, df[i, cov_vec])
       }
       meanT <- mean(v)
-    } else {
+    } else { # Subpopulation-MIC
       meanT <- mean_from_surv(model, cov)
     }
   }
@@ -73,7 +76,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
     meanD = meanD
   )
   
-  #Bootstrap 
+  # Bootstrap 
   if(boot){ 
     boot_estimates <- replicate(nboot, { #replicateds 
       indices <- sample(1:nrow(df), replace = TRUE)
@@ -88,7 +91,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
   return(result)
 }
 
-#TV Distance
+# TV Distance
 tv_distance <- function(p, q) {
   0.5 * sum(abs(p - q))
 }
@@ -96,14 +99,14 @@ tv_distance <- function(p, q) {
 
 # Assume the scores are in {1, 2, ..., score_max}
 
-#For NPMLE 
+# For NPMLE 
 #max_score set to 5 always
 
 
 
-#Assume the scores are in {1, 2, ..., score_max}
+# Assume the scores are in {1, 2, ..., score_max}
 transform_df <- function(df, score_max){
-  
+
   #check if there is non-sensicle data 
   if(any(df$Delta < 1 & df$Indicator == 1)){ 
     warning("Exists at least one patient with no score improvement but reports feeling significantly better")

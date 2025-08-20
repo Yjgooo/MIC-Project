@@ -1,9 +1,11 @@
 
+library(mvtnorm)
+
 simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
   if (!is.null(seed)) set.seed(seed)
   
   k <- 10
-  delta_vals <- 1:k
+  delta_vals <- -3:k
   T_vals     <- 1:k
   
   # simulate covariates
@@ -15,7 +17,116 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
   Delta <- integer(n)
   T     <- integer(n)
   
+  #p_T <- numeric(k) #temporary 
   switch(as.character(setup),
+         "dmg.1" = {
+           mu    <- c(3, 3)
+           Sigma <- matrix(c(2,1, 1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "dmg.2" = {
+           mu    <- c(3, 4)
+           Sigma <- matrix(c(2,1, 1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         
+         "dmg.3" = {
+           mu    <- c(3, 6)
+           Sigma <- matrix(c(2,1, 1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "-6" = {
+           raw_w  <- dnorm(delta_vals, mean = 3, sd = 2)  
+           p_delta <- raw_w / sum(raw_w)
+           
+           raw_v   <- dnorm(T_vals, mean = 6, sd = 2)  
+           p_T      <- raw_v / sum(raw_v)
+           for (i in seq_len(n)) {
+             Delta[i] <- sample(delta_vals, 1, prob = p_delta)
+             T[i]     <- sample(T_vals, 1,     prob = p_T)
+           }
+         },
+         "-5" = {
+           raw_w  <- dnorm(delta_vals, mean = 3, sd = 2)  
+           p_delta <- raw_w / sum(raw_w)
+           
+           raw_v   <- dnorm(T_vals, mean = 5, sd = 2)   
+           p_T      <- raw_v / sum(raw_v)
+           for (i in seq_len(n)) {
+             Delta[i] <- sample(delta_vals, 1, prob = p_delta)
+             T[i]     <- sample(T_vals, 1,     prob = p_T)
+           }
+         },
+         "-4" = {
+           raw_w  <- dnorm(delta_vals, mean = 3, sd = 2)  
+           p_delta <- raw_w / sum(raw_w)
+           
+           raw_v   <- dnorm(T_vals, mean = 4, sd = 2)  
+           p_T      <- raw_v / sum(raw_v)
+           for (i in seq_len(n)) {
+             Delta[i] <- sample(delta_vals, 1, prob = p_delta)
+             T[i]     <- sample(T_vals, 1,     prob = p_T)
+           }
+         },
+         "-3" = {
+           raw_w  <- dnorm(delta_vals, mean = 3, sd = 2)  
+           p_delta <- raw_w / sum(raw_w)
+           
+           raw_v   <- dnorm(T_vals, mean = 3, sd = 2)  
+           p_T      <- raw_v / sum(raw_v)
+           for (i in seq_len(n)) {
+             Delta[i] <- sample(delta_vals, 1, prob = p_delta)
+             T[i]     <- sample(T_vals, 1,     prob = p_T)
+           }
+         },
          "0" = {
            for (i in seq_len(n)) {
              Delta[i] <- sample(delta_vals, 1, prob = rep(1/k, k))
@@ -49,6 +160,44 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
              Delta[i] <- sample(delta_vals, 1, prob = Dp)
            }
          },
+         
+         "4" = { # David's example 3 
+            PRO <- c(0.8, 0.1, 0.1)
+            MIC <- c(0.5, 0.5)
+            
+            Delta <- sample(
+              x       = c(0,1,2),
+              size    = n,
+              replace = TRUE,
+              prob    = PRO
+            )
+            
+            T <- sample(
+              x       = c(1,2),
+              size    = n, 
+              replace = TRUE,
+              prob    = MIC
+            )
+         },
+         
+         "5" = { # Is David's example robust to wider range of MIC? 
+           PRO <- c(0.3, 0.1, 0.2, 0.2, 0.2)
+           MIC <- c(0.1, 0.1, 0.4, 0.4)
+           
+           Delta <- sample(
+             x       = c(0:4),
+             size    = n,
+             replace = TRUE,
+             prob    = PRO
+           )
+           
+           T <- sample(
+             x       = c(1:4),
+             size    = n, 
+             replace = TRUE,
+             prob    = MIC
+           )
+         },
          stop("Invalid setup")
   )
   
@@ -67,6 +216,22 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
     if (!race %in% 0:2) stop("race must be 0,1,2")
     if (!sex  %in% 0:1) stop("sex must be 0,1")
     switch(as.character(setup),
+           "dmg.1" = {
+             dim(p) <- c(length(xs), length(ys))
+             pmf <- colSums(p)
+           },
+           "-6" = {
+             pmf <- p_T
+           },
+           "-5" = {
+             pmf <- p_T
+           },
+           "-4" = {
+             pmf <- p_T
+           },
+           "-3" = {
+             pmf <- p_T
+           },
            "0" = {
              pmf <- rep(1/k, k)
            },
@@ -89,6 +254,7 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
              pmf <- rep_len(Tp / sum(Tp), k)
            }
     )
+    #print(pmf) #temp
     names(pmf) <- paste0("t=", T_vals)
     pmf
   }
@@ -123,16 +289,13 @@ np_sim <- function(n,m, setup, cov = NULL){ #cov = NULL is a just a placeholder 
   
   for(i in 1:m){
     data_oracle <- simulate_data_np(n, setup)
-    data_observed <- subset(data_oracle, select = -T) #dataframe without T
+    data_observed <- subset(data_oracle, select = -T) # dataframe without T
     df <- transform_df(data_observed, score_max = 11)
     
     true_mean = mean(data_oracle$T)
     fit_np <- MIC(df, "np")
     vec[i] <- abs(true_mean - fit_np$meanT)
-    #print("**********")
-    #print(true_pmf)
-    #print(pmf(fit_np$model, max_time = 10)$y)
-    tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit_np$model, max_time = 10)$y) #NPMLE simulation only considers max_time = 4 
+    tv_dist_vec[i] <- tv_distance(true_pmf, pmf(fit_np$model, max_time = 10)$y) # NPMLE simulation only considers max_time = 4 
   }
   
   result <- list(

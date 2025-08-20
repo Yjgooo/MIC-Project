@@ -243,7 +243,7 @@ ph_sim <- function(n,m, setup, cov = NULL){
   vec <- numeric(m)
   tv_dist_vec = numeric(m)
   
-  #models on restricted data;
+  # models on restricted data;
   for(i in 1:m){
     data_oracle <- simulate_data_ph(n = n, setup = setup)
     data_observed <- subset(data_oracle, select = -T) #dataframe without T
