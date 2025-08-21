@@ -13,10 +13,10 @@ generic_sim <- function(n, m, setup, cov = NULL,
   print("model")
   print(model)
   
-  # 1. get simulation function
+  # get simulation function
   sim <- get(sim_model)
   
-  # 2. large sample for "truth"
+  # large sample for "truth"
   tmp0       <- sim(n = N0, setup = setup, cov = cov)
   data_large <- tmp0$dataframe
   cond_pmf   <- tmp0$cond_pmf
@@ -42,7 +42,7 @@ generic_sim <- function(n, m, setup, cov = NULL,
   
   true_marg_pmf <- colMeans(true_pmf_mat)
   
-  # 3. Monte Carlo replicates (parallel)
+  # Monte Carlo replicates (parallel)
   results_list <- mclapply(seq_len(m), function(i) {
     tmp    <- sim(n = n, setup = setup)
     df0    <- transform_df(tmp$dataframe, 11) 

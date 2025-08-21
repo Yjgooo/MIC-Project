@@ -78,6 +78,7 @@ MIC <- function(df, method, user_formula = NULL, cov = NULL,
   
   # Bootstrap 
   if(boot){ 
+    # replicate runs the code nboot times the result is a vector of length nboot 
     boot_estimates <- replicate(nboot, { #replicateds 
       indices <- sample(1:nrow(df), replace = TRUE)
       res_boot <- MIC(df[indices, ], method, user_formula, cov, conf_level, nboot, boot = FALSE)  # Call MIC with boot = FALSE to avoid recursion of bootstrap
