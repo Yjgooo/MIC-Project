@@ -19,7 +19,7 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
   
   #p_T <- numeric(k) #temporary 
   switch(as.character(setup),
-         "dmg.1" = {
+         "A.1" = {
            mu    <- c(3, 3)
            Sigma <- matrix(c(2,1, 1,2),2)
            
@@ -40,7 +40,7 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
            T <- grid[idx, 2]
            
          },
-         "dmg.2" = {
+         "A.2" = {
            mu    <- c(3, 4)
            Sigma <- matrix(c(2,1, 1,2),2)
            
@@ -62,9 +62,199 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
            
          },
          
-         "dmg.3" = {
+         "A.3" = {
            mu    <- c(3, 6)
            Sigma <- matrix(c(2,1, 1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "B.1" = {
+           mu    <- c(3, 3)
+           Sigma <- matrix(c(2,-1, -1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "B.2" = {
+           mu    <- c(3, 4)
+           Sigma <- matrix(c(2,-1,-1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "B.3" = {
+           mu    <- c(3, 6)
+           Sigma <- matrix(c(2,-1,-1,2),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "C.1" = {
+           mu    <- c(3, 3)
+           Sigma <- matrix(c(4,-2, -2,4),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "C.2" = {
+           mu    <- c(3, 4)
+           Sigma <- matrix(c(4, -2, -2, 4),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "C.3" = {
+           mu    <- c(3, 6)
+           Sigma <- matrix(c(4,-2,-2, 4),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         
+         "D.1" = {
+           mu    <- c(3, 3)
+           Sigma <- matrix(c(4, 2, 2, 4),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "D.2" = {
+           mu    <- c(3, 4)
+           Sigma <- matrix(c(4, 2, 2, 4),2)
+           
+           # 1) pick a finite grid
+           xs <- -3:10 # Delta
+           ys <- 1:10 # MIC
+           grid <- expand.grid(x=xs, y=ys)
+           
+           # 2) compute (unnormalized) probs
+           dens <- dmvnorm(grid, mean=mu, sigma=Sigma)
+           p    <- dens / sum(dens)
+           
+           # 3) sample N indices with those probs
+           idx <- sample(seq_len(nrow(grid)), size=n, replace=TRUE, prob=p)
+           
+           # 4) extract your integer draws
+           Delta <- grid[idx, 1]
+           T <- grid[idx, 2]
+           
+         },
+         "D.3" = {
+           mu    <- c(3, 6)
+           Sigma <- matrix(c(4, 2, 2, 4),2)
            
            # 1) pick a finite grid
            xs <- -3:10 # Delta
@@ -215,46 +405,45 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
   cond_pmf <- function(race, sex, cont) {
     if (!race %in% 0:2) stop("race must be 0,1,2")
     if (!sex  %in% 0:1) stop("sex must be 0,1")
-    switch(as.character(setup),
-           "dmg.1" = {
-             dim(p) <- c(length(xs), length(ys))
-             pmf <- colSums(p)
-           },
-           "-6" = {
-             pmf <- p_T
-           },
-           "-5" = {
-             pmf <- p_T
-           },
-           "-4" = {
-             pmf <- p_T
-           },
-           "-3" = {
-             pmf <- p_T
-           },
-           "0" = {
-             pmf <- rep(1/k, k)
-           },
-           "1" = {
-             Tp <- exp(c(2,1,0,0)); Tp <- Tp/sum(Tp)
-             pmf <- rep_len(Tp, k)
-           },
-           "2" = {
-             Dp <- exp(c(0,0.1,0.2,0.5,3,2,1,0.5,0.1))
-             Dp <- Dp/sum(Dp)
-             t_for_d <- pmin(4 - delta_vals + 1, 4)
-             pmf <- vapply(T_vals, function(t) sum(Dp[t_for_d == t]), numeric(1))
-           },
-           "3" = {
-             vec1  <- c(2,1,0,0); vec2 <- c(0,1,2,0); vec3 <- c(0,3,1,0)
-             mat_race <- cbind(vec1, vec2, vec3)
-             vec1_ <- c(0.3,1,-0.3,-0.1); vec2_ <- c(0,0,1,0.3)
-             mat_sex <- cbind(vec1_, vec2_)
-             Tp <- exp(mat_race[, race + 1] + mat_sex[, sex + 1])
-             pmf <- rep_len(Tp / sum(Tp), k)
-           }
-    )
-    #print(pmf) #temp
+    
+    if (setup %in% c("A.1", "A.2", "A.3", "B.1", "B.2", "B.3")) {
+      dim(p) <- c(length(xs), length(ys))
+      pmf <- colSums(p)
+      
+    } else if (setup %in% c("-6", "-5", "-4", "-3")) {
+      pmf <- p_T
+      
+    } else if (setup == "0") {
+      pmf <- rep(1/k, k)
+      
+    } else if (setup == "1") {
+      Tp <- exp(c(2, 1, 0, 0))
+      Tp <- Tp / sum(Tp)
+      pmf <- rep_len(Tp, k)
+      
+    } else if (setup == "2") {
+      Dp <- exp(c(0, 0.1, 0.2, 0.5, 3, 2, 1, 0.5, 0.1))
+      Dp <- Dp / sum(Dp)
+      t_for_d <- pmin(4 - delta_vals + 1, 4)
+      pmf <- vapply(T_vals, function(t) sum(Dp[t_for_d == t]), numeric(1))
+      
+    } else if (setup == "3") {
+      vec1  <- c(2, 1, 0, 0)
+      vec2  <- c(0, 1, 2, 0)
+      vec3  <- c(0, 3, 1, 0)
+      mat_race <- cbind(vec1, vec2, vec3)
+      
+      vec1_ <- c(0.3, 1, -0.3, -0.1)
+      vec2_ <- c(0, 0, 1, 0.3)
+      mat_sex <- cbind(vec1_, vec2_)
+      
+      Tp <- exp(mat_race[, race + 1] + mat_sex[, sex + 1])
+      pmf <- rep_len(Tp / sum(Tp), k)
+      
+    } else {
+      stop("Unknown setup value")
+    }
+    
     names(pmf) <- paste0("t=", T_vals)
     pmf
   }
@@ -266,8 +455,8 @@ simulate_data_np <- function(n, seed = NULL, setup = 0, cov = NULL) {
   
   list(
     dataframe = df,
-    cond_pmf   = cond_pmf,
-    mean_time  = mean_time
+    cond_pmf  = cond_pmf,
+    mean_time = mean_time
   )
 }
 
