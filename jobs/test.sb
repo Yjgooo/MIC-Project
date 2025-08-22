@@ -26,7 +26,7 @@ algorithm=$(( (SLURM_ARRAY_TASK_ID - 1) % 6 + 1 ))
 echo "Running Setting=$setting Algorithm=$algorithm"
 
 # 6. Run Rscript with setting and algorithm as arguments
-Rscript jobs/test.R "$setting" "$algorithm"
+Rscript scripts/test.R "$setting" "$algorithm"
 
 # 7. Echo end time
 echo "end: $(date +%H:%M:%S)"
